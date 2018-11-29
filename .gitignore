@@ -26,3 +26,5 @@
 
 /orderdb
 /leveldb
+
+*.DS_Store
