@@ -1,7 +1,7 @@
 
 FROM maven:alpine as builder
-ADD ./pom.xml pom.xml
-ADD ./src src/
+COPY pom.xml pom.xml
+COPY src/ src/
 VOLUME /var/maven/.m2
 RUN mvn -DskipTests clean package
 

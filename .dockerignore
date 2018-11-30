@@ -1,5 +1,6 @@
 *
 !target/*jar
 !Dockerfile
-!Dockerfile.build
+!pom.xml
+!src
 !README.md
