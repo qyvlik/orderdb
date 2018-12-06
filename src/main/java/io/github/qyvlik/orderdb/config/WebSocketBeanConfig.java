@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @Configuration
-public class BeanConfig {
+public class WebSocketBeanConfig {
 
     @Autowired
     private List<RpcMethod> rpcMethodList;
@@ -26,18 +26,18 @@ public class BeanConfig {
         return new WebSocketSessionContainer();
     }
 
-    @Bean("executor")
-    public Executor executor() {
+    @Bean("webSocketExecutor")
+    public Executor webSocketExecutor() {
         return Executors.newFixedThreadPool(4);
     }
 
     @Bean("orderdb")
-    public WebSocketDispatch orderdb(@Autowired Executor executor,
+    public WebSocketDispatch orderdb(@Autowired Executor webSocketExecutor,
                                      @Autowired WebSocketSessionContainer webSocketSessionContainer) {
         WebSocketDispatch webSocketDispatch = new WebSocketDispatch();
 
         webSocketDispatch.setGroup("orderdb");
-        webSocketDispatch.setExecutor(executor);
+        webSocketDispatch.setExecutor(webSocketExecutor);
         webSocketDispatch.setWebSocketSessionContainer(webSocketSessionContainer);
         webSocketDispatch.addRpcMethodList(rpcMethodList);
         webSocketDispatch.addFilterList(filters);

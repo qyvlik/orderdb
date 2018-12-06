@@ -1,9 +1,7 @@
 package io.github.qyvlik.orderdb.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.github.qyvlik.orderdb.entity.SequenceRecord;
-import org.apache.commons.lang3.StringUtils;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,48 +14,70 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 @Service
 public class SequenceService {
 
+    public static final String SEQ_COUNTER = "seq-counter:";
     public static final String SEQ = "seq:";
-    public static final String SEQ_KEY = "seq-key:";
+    public static final String KEY = "key:";
+
     @Autowired
     @Qualifier("levelDB")
     private DB levelDB;
 
-    public Long sequence(String group, String key, String value) {
+    public byte[] valKey(String group, String key) {
+        return bytes(KEY + group + ":" + key);
+    }
+
+    public byte[] valSeq(String group, Long seqNum) {
+        return bytes(SEQ + group + ":" + seqNum);
+    }
+
+    public byte[] seqCounter(String group) {
+        return bytes(SEQ_COUNTER + group);
+    }
+
+    public synchronized long sequence(String group, String key, Object data) {
         try {
-            byte[] valInDB = levelDB.get(bytes(group + ":" + key));
-            if (valInDB == null) {
+            byte[] valKey = valKey(group, key);
+            byte[] valInDB = levelDB.get(valKey);
 
-                WriteBatch writeBatch = levelDB.createWriteBatch();
-
-                String seqNumStr = asString(levelDB.get(bytes(SEQ + group)));
-                if (seqNumStr == null) {
-                    seqNumStr = "0";
-                    writeBatch.put(bytes(SEQ + group), bytes(seqNumStr));
-                }
-
-                Long seqNum = Long.parseLong(seqNumStr);
-                seqNum += 1;
-
-                // update counter
-                writeBatch.put(bytes(SEQ + group), bytes(seqNum + ""));
-
-                // save id, seqNum
-                writeBatch.put(bytes(SEQ_KEY + group + ":" + key), bytes(seqNum + ""));
-
-                // save seqNum, id
-                writeBatch.put(bytes(SEQ + group + ":" + seqNum), bytes(key));
-
-
-                // insert value
-                writeBatch.put(bytes(group + ":" + key), bytes(value));
-
-                levelDB.write(writeBatch);
-
-                return seqNum;
-            } else {
-                String seqNumStr = asString(levelDB.get(bytes("seq:" + group)));
-                return Long.parseLong(seqNumStr);
+            if (valInDB != null) {
+                String val = asString(valInDB);
+                SequenceRecord record = JSON.parseObject(val).toJavaObject(SequenceRecord.class);
+                return record.getSequenceId();
             }
+
+            byte[] seqCounter = seqCounter(group);
+
+            WriteBatch writeBatch = levelDB.createWriteBatch();
+
+            String seqNumStr = asString(levelDB.get(seqCounter));
+            if (seqNumStr == null) {
+                seqNumStr = "0";
+                writeBatch.put(seqCounter, bytes(seqNumStr));
+            }
+
+            Long seqNum = Long.parseLong(seqNumStr);
+            seqNum += 1;
+
+            // update counter
+            writeBatch.put(seqCounter, bytes(seqNum + ""));
+
+            SequenceRecord record = new SequenceRecord();
+            record.setSequenceId(seqNum);
+            record.setUniqueKey(asString(valKey));
+            record.setData(data);
+
+            byte[] val = bytes(JSON.toJSONString(record));
+
+            // save key, value
+            writeBatch.put(valKey, val);
+
+            // save seq, vale
+            writeBatch.put(valSeq(group, seqNum), val);
+
+            levelDB.write(writeBatch);
+
+            return seqNum;
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -65,23 +85,15 @@ public class SequenceService {
 
     public SequenceRecord get(String group, String key) {
         try {
-            byte[] valInDB = levelDB.get(bytes(group + ":" + key));
+            byte[] valKey = valKey(group, key);
+            byte[] valInDB = levelDB.get(valKey);
 
-            String seqNumStr = asString(levelDB.get(bytes(SEQ_KEY + group + ":" + key)));
-
-            if (valInDB == null) {
-                return null;
+            if (valInDB != null) {
+                String val = asString(valInDB);
+                return JSON.parseObject(val).toJavaObject(SequenceRecord.class);
             }
 
-            Long seqNum = Long.parseLong(seqNumStr);
-            String val = asString(valInDB);
-            JSONObject obj = JSON.parseObject(val);
-
-            return new SequenceRecord(
-                    seqNum,
-                    key,
-                    obj
-            );
+            return null;
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -90,26 +102,15 @@ public class SequenceService {
 
     public SequenceRecord get(String group, Long seqNum) {
         try {
-            String uniqueKey = asString(levelDB.get(bytes(SEQ + group + ":" + seqNum)));
+            byte[] valKey = valSeq(group, seqNum);
+            byte[] valInDB = levelDB.get(valKey);
 
-            if (StringUtils.isBlank(uniqueKey)) {
-                return null;
+            if (valInDB != null) {
+                String val = asString(valInDB);
+                return JSON.parseObject(val).toJavaObject(SequenceRecord.class);
             }
 
-            byte[] valInDB = levelDB.get(bytes(group + ":" + uniqueKey));
-
-            if (valInDB == null) {
-                return null;
-            }
-
-            String val = asString(valInDB);
-            JSONObject obj = JSON.parseObject(val);
-
-            return new SequenceRecord(
-                    seqNum,
-                    uniqueKey,
-                    obj
-            );
+            return null;
 
         } catch (Exception e) {
             throw new RuntimeException(e);

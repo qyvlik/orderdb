@@ -35,11 +35,11 @@ public class SequenceMethod extends RpcMethod {
                 )));
     }
 
-    public ResponseObject<Long> orderDBSequence(String group, String uniqueKey, String valueOfJSONString) {
+    public ResponseObject<Long> orderDBSequence(String group, String uniqueKey, Object data) {
         ResponseObject<Long> responseObject = new ResponseObject<>();
 
         try {
-            Long sequence = sequenceService.sequence(group, uniqueKey, valueOfJSONString);
+            Long sequence = sequenceService.sequence(group, uniqueKey, data);
             responseObject.setResult(sequence);
         } catch (Exception e) {
             logger.error("{} error:{}", getMethod(), e.getMessage());
@@ -58,6 +58,6 @@ public class SequenceMethod extends RpcMethod {
         String uniqueKey = params.get(1).toString();
         JSONObject jsonObject = (JSONObject) params.get(2);
 
-        return orderDBSequence(group, uniqueKey, jsonObject.toJSONString());
+        return orderDBSequence(group, uniqueKey, jsonObject);
     }
 }
