@@ -72,7 +72,7 @@ ApplicationWindow {
 
     Timer {
         id: timer
-        property int  currentId: 1000
+        property int  currentId: 1000000
         interval: 50
         running: false
         repeat: true
@@ -85,11 +85,11 @@ ApplicationWindow {
     }
 
     function batchSeq(currentId, count) {
-        var seqCB = function(res){
-            orderDBGetValueBySequenceId("test", res.result, function(res){
-                 // console.log("orderDBGetValueBySequenceId:" + JSON.stringify(res).length);
-            })
-        };
+//        var seqCB = function(res){
+//            orderDBGetValueBySequenceId("test", res.result, function(res){
+//                 // console.log("orderDBGetValueBySequenceId:" + JSON.stringify(res).length);
+//            })
+//        };
 
         while(count -- > 0) {
             orderDBSequence("test",
@@ -98,8 +98,8 @@ ApplicationWindow {
                                 id: currentId+count,
                                 price: "1000.0",
                                 amount: "1.0"
-                            },
-                            seqCB);
+                            }, function(){}
+                            );
         }
     }
 
@@ -116,12 +116,12 @@ ApplicationWindow {
 
     RpcClient {
         id: writeClient
-        url: "ws://localhost:8081/orderdb"
+        url: "ws://120.79.231.205:51024/orderdb"
     }
 
     RpcClient {
         id: readerClient
-        url: "ws://localhost:8081/orderdb"
+        url: "ws://120.79.231.205:51024/orderdb"
     }
 
 }
