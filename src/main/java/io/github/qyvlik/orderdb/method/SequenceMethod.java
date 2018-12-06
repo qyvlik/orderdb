@@ -31,7 +31,7 @@ public class SequenceMethod extends RpcMethod {
                 Lists.newArrayList(
                         new StringParam("group"),
                         new StringParam("uniqueKey"),
-                        new JSONObjectParam("value")
+                        new JSONObjectParam("data")
                 )));
     }
 
@@ -56,8 +56,8 @@ public class SequenceMethod extends RpcMethod {
 
         String group = params.get(0).toString();
         String uniqueKey = params.get(1).toString();
-        JSONObject jsonObject = (JSONObject) params.get(2);
+        JSONObject data = (JSONObject) params.get(2);
 
-        return orderDBSequence(group, uniqueKey, jsonObject);
+        return orderDBSequence(group, uniqueKey, data);
     }
 }
