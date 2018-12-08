@@ -42,7 +42,8 @@ public class SequenceMethod extends RpcMethod {
             Long sequence = sequenceService.sequence(group, key, data);
             responseObject.setResult(sequence);
         } catch (Exception e) {
-            logger.error("{} error:{}", getMethod(), e.getMessage());
+            logger.error("method:{}, group:{}, key:{}, object:{}, error:{}",
+                    getMethod(), group, key, data, e.getMessage());
             responseObject.setError(new ResponseError(500, e.getMessage()));
         }
 

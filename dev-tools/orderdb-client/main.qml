@@ -26,38 +26,53 @@ ApplicationWindow {
             }
         }
 
-        TextField {
-            id: idInput
+        RowLayout {
             Layout.fillWidth: true
-            placeholderText: "input sequenceId"
+            TextField {
+                id: sequenceInput
+                Layout.fillWidth: true
+                placeholderText: "input sequence"
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "get.by.sequence"
+                onClicked: {
+                    orderDBGetBySequence("test", sequenceInput.text, function(res){
+                        console.log("res:" + JSON.stringify(res))
+                    });
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            TextField {
+                id: keyInput
+                Layout.fillWidth: true
+                placeholderText: "input key"
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "get.by.key"
+                onClicked: {
+                    orderDBGetByKey("test", keyInput.text, function(res){
+                        console.log("res:" + JSON.stringify(res))
+                    });
+                }
+            }
         }
 
         Button {
             Layout.fillWidth: true
-            text: "orderdb.get.value.by.sequenceId"
+            text: "get latest sequence"
             onClicked: {
-                orderDBGetValueBySequence("test", idInput.text, function(res){
+                orderDBGetLatestSequence("test", function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
         }
-
-//        Button {
-//            Layout.fillWidth: true
-//            text: "orderdb.sequence"
-//            onClicked: {
-//                orderDBSequence("test",
-//                                "submit-" + idInput.text,
-//                                {
-//                                    id: idInput.text,
-//                                    price: "1000.0",
-//                                    amount: "1.0"
-//                                },
-//                                function(res){
-//                                    console.log("orderdb.sequence:" + JSON.stringify(res));
-//                                });
-//            }
-//        }
 
         Button {
             Layout.fillWidth: true
@@ -72,14 +87,15 @@ ApplicationWindow {
 
     Timer {
         id: timer
-        property int  currentId: 1000000
+        property int  currentId: 16
         interval: 50
         running: false
         repeat: true
         onTriggered: {
+            var size = 500;
             console.time("batchSeq")
-            batchSeq(currentId, 1000);
-            currentId+=100;
+            batchSeq(currentId, size);
+            currentId += size;
             console.timeEnd("batchSeq")
         }
     }
@@ -98,14 +114,19 @@ ApplicationWindow {
     }
 
 
-    function orderDBGetValueByKey(group, key, callback) {
-        var params = [group, key];
-        readerClient.callRpcMethod("get.value.by.key", params, callback);
+    function orderDBGetLatestSequence(group, callback) {
+        var params = [group];
+        readerClient.callRpcMethod("get.latest.sequence", params, callback);
     }
 
-    function orderDBGetValueBySequence(group, sequenceId, callback) {
+    function orderDBGetByKey(group, key, callback) {
+        var params = [group, key];
+        readerClient.callRpcMethod("get.by.key", params, callback);
+    }
+
+    function orderDBGetBySequence(group, sequenceId, callback) {
         var params = [group, sequenceId];
-        readerClient.callRpcMethod("get.value.by.sequence", params, callback);
+        readerClient.callRpcMethod("get.by.sequence", params, callback);
     }
 
     function orderDBSequence(group, key, value, callback) {

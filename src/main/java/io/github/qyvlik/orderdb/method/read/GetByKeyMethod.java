@@ -18,15 +18,15 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class GetValueByKeyMethod extends RpcMethod {
+public class GetByKeyMethod extends RpcMethod {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private SequenceService sequenceService;
 
-    public GetValueByKeyMethod() {
-        super("orderdb", "get.value.by.key", new RpcParams(
+    public GetByKeyMethod() {
+        super("orderdb", "get.by.key", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group"),
                         new StringParam("key")

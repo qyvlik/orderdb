@@ -19,14 +19,14 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class GetValueBySequenceMethod extends RpcMethod {
+public class GetBySequenceMethod extends RpcMethod {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private SequenceService sequenceService;
 
-    public GetValueBySequenceMethod() {
-        super("orderdb", "get.value.by.sequence", new RpcParams(
+    public GetBySequenceMethod() {
+        super("orderdb", "get.by.sequence", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group"),
                         new LongParam("sequence")

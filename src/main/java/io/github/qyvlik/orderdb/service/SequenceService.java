@@ -67,13 +67,15 @@ public class SequenceService {
             record.setUniqueKey(asString(valKey));
             record.setData(data);
 
+            // valKey
             byte[] val = bytes(JSON.toJSONString(record));
+            byte[] valSeq = valSeq(group, seqNum);
 
             // save key, value
-            writeBatch.put(valKey, val);
+            writeBatch.put(valKey, valSeq);
 
             // save seq, valKey
-            writeBatch.put(valSeq(group, seqNum), valKey);
+            writeBatch.put(valSeq, val);
 
             levelDB.write(writeBatch);
 
@@ -84,9 +86,12 @@ public class SequenceService {
         }
     }
 
-    public SequenceRecord getByKey(String group, String key) {
+    private SequenceRecord getByFullKey(byte[] valKey) {
+        if (valKey == null) {
+            return null;
+        }
+
         try {
-            byte[] valKey = valKey(group, key);
             byte[] valInDB = levelDB.get(valKey);
 
             if (valInDB != null) {
@@ -95,23 +100,23 @@ public class SequenceService {
             }
 
             return null;
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    public SequenceRecord getByKey(String group, String key) {
+        try {
+            return getByFullKey(levelDB.get(valKey(group, key)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public SequenceRecord getBySequence(String group, Long seqNum) {
         try {
-            byte[] key = valSeq(group, seqNum);
-            byte[] valKey = levelDB.get(key);
-
-            if (valKey != null) {
-                return getByKey(group, asString(valKey));
-            }
-
-            return null;
-
+            return getByFullKey(valSeq(group, seqNum));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
