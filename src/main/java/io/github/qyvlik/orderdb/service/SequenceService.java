@@ -35,16 +35,15 @@ public class SequenceService {
     }
 
     // use a single thread to write
-    public long sequence(String group, String key, Object data) {
+    public SequenceRecord sequence(String group, String key, Object data) {
         try {
-            byte[] valKey = valKey(group, key);
-            byte[] valInDB = levelDB.get(valKey);
+            SequenceRecord record = getByKey(group, key);
 
-            if (valInDB != null) {
-                String val = asString(valInDB);
-                SequenceRecord record = JSON.parseObject(val).toJavaObject(SequenceRecord.class);
-                return record.getSequenceId();
+            if (record != null) {
+                return record;
             }
+
+            byte[] valKey = valKey(group, key);
 
             byte[] seqCounter = seqCounter(group);
 
@@ -62,10 +61,7 @@ public class SequenceService {
             // update counter
             writeBatch.put(seqCounter, bytes(seqNum + ""));
 
-            SequenceRecord record = new SequenceRecord();
-            record.setSequenceId(seqNum);
-            record.setUniqueKey(asString(valKey));
-            record.setData(data);
+            record = new SequenceRecord(group, seqNum, asString(valKey), data);
 
             // valKey
             byte[] val = bytes(JSON.toJSONString(record));
@@ -79,7 +75,7 @@ public class SequenceService {
 
             levelDB.write(writeBatch);
 
-            return seqNum;
+            return record;
 
         } catch (Exception e) {
             throw new RuntimeException(e);

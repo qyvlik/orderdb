@@ -25,7 +25,6 @@ WebSocket {
     }
 
     function subChannel(channel, params, subscribe, callback) {
-        subscribe = subscribe || true;
         callback = callback || function(res) {
             console.log(JSON.stringify(res));
         };

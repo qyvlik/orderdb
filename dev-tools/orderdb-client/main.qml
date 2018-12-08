@@ -91,6 +91,28 @@ ApplicationWindow {
         }
 
         Button {
+            id: subscribeButton
+            Layout.fillWidth: true
+            text: "subscribe:" + subscribeButton.subscribe
+            property bool subscribe: false
+            onClicked: {
+                subscribeButton.subscribe = !subscribeButton.subscribe;
+                orderDBSubSequence("test", subscribeButton.subscribe, function(res){
+                    if (res.error) {
+                        console.error("orderDBSubSequence error:" + JSON.stringify(res));
+                        return;
+                    }
+
+                    if (res.result === 'subscribe') {
+                        return;
+                    }
+
+                    console.info("orderDBSubSequence: " + JSON.stringify(res));
+                });
+            }
+        }
+
+        Button {
             Layout.fillWidth: true
             text: "get latest sequence"
             onClicked: {
@@ -113,12 +135,12 @@ ApplicationWindow {
 
     Timer {
         id: timer
-        property int  currentId: 16
+        property int  currentId: 1
         interval: 50
         running: false
         repeat: true
         onTriggered: {
-            var size = 500;
+            var size = 10;
             console.time("batchSeq")
             batchSeq(currentId, size);
             currentId += size;
@@ -129,7 +151,7 @@ ApplicationWindow {
     function batchSeq(currentId, count) {
         while(count -- > 0) {
             orderDBSequence("test",
-                            "submit-" + currentId+count,
+                            "submit-" + (currentId+count),
                             {
                                 id: currentId+count,
                                 price: "1000.0",
@@ -163,6 +185,11 @@ ApplicationWindow {
     function orderDBSequence(group, key, value, callback) {
         var params =  [group, key, value];
         writeClient.callRpcMethod("sequence", params, callback)
+    }
+
+    function orderDBSubSequence(group, subscribe, callback) {
+        var params = [group];
+        readerClient.subChannel("sub.sequence", params, subscribe, callback);
     }
 
     RpcClient {

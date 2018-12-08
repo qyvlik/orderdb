@@ -1,5 +1,6 @@
 package io.github.qyvlik.orderdb.config;
 
+import io.github.qyvlik.jsonrpclite.core.common.ITaskQueue;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketDispatch;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketFilter;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,6 +23,7 @@ public class WebSocketBeanConfig {
 
     @Autowired
     private List<WebSocketFilter> filters;
+
 
     @Autowired
     @Qualifier("writeExecutor")
@@ -38,9 +41,9 @@ public class WebSocketBeanConfig {
 
     @Bean("orderDBDispatch")
     public WebSocketDispatch orderDBDispatch(@Autowired Executor webSocketExecutor,
-                                     @Autowired WebSocketSessionContainer webSocketSessionContainer) {
+                                             @Autowired WebSocketSessionContainer webSocketSessionContainer) {
 
-        for(RpcMethod rpcMethod :rpcMethodList) {
+        for (RpcMethod rpcMethod : rpcMethodList) {
             if (rpcMethod.getGroup().equals("orderdb") && rpcMethod.getMethod().equals("orderdb.sequence")) {
                 rpcMethod.setExecutor(writeExecutor);
             }
@@ -56,5 +59,7 @@ public class WebSocketBeanConfig {
 
         return webSocketDispatch;
     }
+
+
 
 }

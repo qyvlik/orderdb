@@ -7,8 +7,10 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
+import io.github.qyvlik.orderdb.entity.SequenceRecord;
 import io.github.qyvlik.orderdb.method.param.JSONObjectParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
+import io.github.qyvlik.orderdb.push.SequenceRecordPush;
 import io.github.qyvlik.orderdb.service.SequenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,9 @@ public class SequenceMethod extends RpcMethod {
     @Autowired
     private SequenceService sequenceService;
 
+    @Autowired
+    private SequenceRecordPush sequenceRecordPush;
+
     public SequenceMethod() {
         super("orderdb", "sequence", new RpcParams(
                 Lists.newArrayList(
@@ -39,8 +44,14 @@ public class SequenceMethod extends RpcMethod {
         ResponseObject<Long> responseObject = new ResponseObject<>();
 
         try {
-            Long sequence = sequenceService.sequence(group, key, data);
-            responseObject.setResult(sequence);
+            SequenceRecord record = sequenceService.sequence(group, key, data);
+
+            if (record != null) {
+                responseObject.setResult(record.getSequenceId());
+                sequenceRecordPush.submit(record);
+            } else {
+                responseObject.setError(new ResponseError(500, "sequence failure"));
+            }
         } catch (Exception e) {
             logger.error("method:{}, group:{}, key:{}, object:{}, error:{}",
                     getMethod(), group, key, data, e.getMessage());
