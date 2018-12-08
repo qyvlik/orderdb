@@ -1,4 +1,4 @@
-package io.github.qyvlik.orderdb.method;
+package io.github.qyvlik.orderdb.method.read;
 
 import com.google.common.collect.Lists;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.request.RequestObject;

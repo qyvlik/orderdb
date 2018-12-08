@@ -116,12 +116,12 @@ ApplicationWindow {
 
     RpcClient {
         id: writeClient
-        url: "ws://120.79.231.205:51024/orderdb"
+        url: "ws://localhost:17711/orderdb"
     }
 
     RpcClient {
         id: readerClient
-        url: "ws://120.79.231.205:51024/orderdb"
+        url: "ws://localhost:17711/orderdb"
     }
 
 }

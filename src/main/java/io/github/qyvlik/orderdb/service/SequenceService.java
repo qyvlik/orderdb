@@ -34,7 +34,7 @@ public class SequenceService {
         return bytes(SEQ_COUNTER + group);
     }
 
-    public synchronized long sequence(String group, String key, Object data) {
+    public long sequence(String group, String key, Object data) {
         try {
             byte[] valKey = valKey(group, key);
             byte[] valInDB = levelDB.get(valKey);

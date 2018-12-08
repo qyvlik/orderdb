@@ -46,6 +46,11 @@ public class OrderDBConfig {
         return db;
     }
 
+    @Bean("writeExecutor")
+    public Executor writeExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
+
     @PreDestroy
     public void closeDB() {
         if (levelDB != null) {

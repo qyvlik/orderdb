@@ -16,12 +16,12 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
-    @Qualifier("orderdb")
-    private WebSocketDispatch orderdb;
+    @Qualifier("orderDBDispatch")
+    private WebSocketDispatch orderDBDispatch;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(orderdb, "/orderdb")
+        registry.addHandler(orderDBDispatch, "/orderdb")
                 .setHandshakeHandler(new DefaultHandshakeHandler(new TomcatRequestUpgradeStrategy()))
                 .setAllowedOrigins("*");
 
