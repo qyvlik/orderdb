@@ -36,7 +36,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             text: "orderdb.get.value.by.sequenceId"
             onClicked: {
-                orderDBGetValueBySequenceId("test", idInput.text, function(res){
+                orderDBGetValueBySequence("test", idInput.text, function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
@@ -85,12 +85,6 @@ ApplicationWindow {
     }
 
     function batchSeq(currentId, count) {
-//        var seqCB = function(res){
-//            orderDBGetValueBySequenceId("test", res.result, function(res){
-//                 // console.log("orderDBGetValueBySequenceId:" + JSON.stringify(res).length);
-//            })
-//        };
-
         while(count -- > 0) {
             orderDBSequence("test",
                             "submit-" + currentId+count,
@@ -103,15 +97,20 @@ ApplicationWindow {
         }
     }
 
-    function orderDBGetValueBySequenceId(group, sequenceId, callback) {
-        var params = [group, sequenceId];
-        readerClient.callRpcMethod("orderdb.get.value.by.sequenceId", params, callback);
+
+    function orderDBGetValueByKey(group, key, callback) {
+        var params = [group, key];
+        readerClient.callRpcMethod("get.value.by.key", params, callback);
     }
 
+    function orderDBGetValueBySequence(group, sequenceId, callback) {
+        var params = [group, sequenceId];
+        readerClient.callRpcMethod("get.value.by.sequence", params, callback);
+    }
 
     function orderDBSequence(group, key, value, callback) {
         var params =  [group, key, value];
-        writeClient.callRpcMethod("orderdb.sequence", params, callback)
+        writeClient.callRpcMethod("sequence", params, callback)
     }
 
     RpcClient {

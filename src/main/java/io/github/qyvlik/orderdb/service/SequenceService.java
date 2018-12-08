@@ -34,6 +34,7 @@ public class SequenceService {
         return bytes(SEQ_COUNTER + group);
     }
 
+    // use a single thread to write
     public long sequence(String group, String key, Object data) {
         try {
             byte[] valKey = valKey(group, key);
@@ -71,8 +72,8 @@ public class SequenceService {
             // save key, value
             writeBatch.put(valKey, val);
 
-            // save seq, vale
-            writeBatch.put(valSeq(group, seqNum), val);
+            // save seq, valKey
+            writeBatch.put(valSeq(group, seqNum), valKey);
 
             levelDB.write(writeBatch);
 
@@ -83,7 +84,7 @@ public class SequenceService {
         }
     }
 
-    public SequenceRecord get(String group, String key) {
+    public SequenceRecord getByKey(String group, String key) {
         try {
             byte[] valKey = valKey(group, key);
             byte[] valInDB = levelDB.get(valKey);
@@ -100,14 +101,13 @@ public class SequenceService {
         }
     }
 
-    public SequenceRecord get(String group, Long seqNum) {
+    public SequenceRecord getBySequence(String group, Long seqNum) {
         try {
-            byte[] valKey = valSeq(group, seqNum);
-            byte[] valInDB = levelDB.get(valKey);
+            byte[] key = valSeq(group, seqNum);
+            byte[] valKey = levelDB.get(key);
 
-            if (valInDB != null) {
-                String val = asString(valInDB);
-                return JSON.parseObject(val).toJavaObject(SequenceRecord.class);
+            if (valKey != null) {
+                return getByKey(group, asString(valKey));
             }
 
             return null;
@@ -115,6 +115,15 @@ public class SequenceService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public long getLatestSequence(String group) {
+        byte[] seqCounter = seqCounter(group);
+        String seqNumStr = asString(levelDB.get(seqCounter));
+        if (seqNumStr == null) {
+            return 0;
+        }
+        return Long.parseLong(seqNumStr);
     }
 
 }

@@ -7,6 +7,7 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
 import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.method.param.LongParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
 import io.github.qyvlik.orderdb.service.SequenceService;
 import org.slf4j.Logger;
@@ -18,25 +19,24 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class GetValueByUniqueKeyMethod extends RpcMethod {
-
+public class GetValueBySequenceMethod extends RpcMethod {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private SequenceService sequenceService;
 
-    public GetValueByUniqueKeyMethod() {
-        super("orderdb", "orderdb.get.value.by.uniqueKey", new RpcParams(
+    public GetValueBySequenceMethod() {
+        super("orderdb", "get.value.by.sequence", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group"),
-                        new StringParam("uniqueKey")
+                        new LongParam("sequence")
                 )));
     }
 
-    public ResponseObject<SequenceRecord> getValueByUniqueKey(String group, String uniqueKey) {
+    public ResponseObject<SequenceRecord> getValueByUniqueKey(String group, Long sequence) {
         ResponseObject<SequenceRecord> responseObject = new ResponseObject<>();
         try {
-            SequenceRecord record = sequenceService.get(group, uniqueKey);
+            SequenceRecord record = sequenceService.getBySequence(group, sequence);
             responseObject.setResult(record);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
@@ -49,7 +49,7 @@ public class GetValueByUniqueKeyMethod extends RpcMethod {
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
         String group = params.get(0).toString();
-        String uniqueKey = params.get(1).toString();
-        return getValueByUniqueKey(group, uniqueKey);
+        Long sequence = Long.parseLong(params.get(1).toString());
+        return getValueByUniqueKey(group, sequence);
     }
 }
