@@ -64,6 +64,32 @@ ApplicationWindow {
             }
         }
 
+        RowLayout {
+            Layout.fillWidth: true
+            TextField {
+                id: fromInput
+                Layout.fillWidth: true
+                placeholderText: "input key"
+            }
+
+            TextField {
+                id: toInput
+                Layout.fillWidth: true
+                placeholderText: "input key"
+            }
+
+
+            Button {
+                Layout.fillWidth: true
+                text: "get.by.key"
+                onClicked: {
+                    orderDBGetList("test", fromInput.text, toInput.text, function(res){
+                        console.log("res:" + JSON.stringify(res))
+                    });
+                }
+            }
+        }
+
         Button {
             Layout.fillWidth: true
             text: "get latest sequence"
@@ -113,6 +139,11 @@ ApplicationWindow {
         }
     }
 
+
+    function orderDBGetList(group, from, to, callback) {
+        var params = [group, from, to, ];
+        readerClient.callRpcMethod("get.list", params, callback);
+    }
 
     function orderDBGetLatestSequence(group, callback) {
         var params = [group];
