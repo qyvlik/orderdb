@@ -46,6 +46,7 @@ response:
   "id": 10001,
   "method": "get.by.sequence",
   "result":{
+    "group": "test",
     "seq": 1,
     "key": "action-1000",
     "data":{}
@@ -77,6 +78,7 @@ response:
   "id": 10001,
   "method": "get.by.key",
   "result":{
+    "group": "test",
     "seq": 1,
     "key": "action-1000",
     "data":{}
@@ -134,11 +136,13 @@ response
   "method": "get.by.key",
   "result":[
     {
+      "group": "test",
       "seq": 1,
       "key": "action-1000",
       "data":{}
     },
     {
+      "group": "test",
       "seq": 2,
       "key": "action-1001",
       "data":{}
@@ -174,6 +178,7 @@ when some one call `sequence` for sequence some data, will receive the data as f
 {
   "channel": "sub.sequence",
   "result": {
+    "group": "test",
     "seq": 2,
     "key": "action-1001",
     "data":{}
