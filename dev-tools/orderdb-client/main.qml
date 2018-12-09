@@ -7,8 +7,8 @@ import QtQuick.Layouts 1.3
 
 
 ApplicationWindow {
-    width: 360
-    height: 680
+    width: 640
+    height: 720
     visible: true
     title: qsTr("orderdb-client")
 
@@ -69,13 +69,13 @@ ApplicationWindow {
             TextField {
                 id: fromInput
                 Layout.fillWidth: true
-                placeholderText: "input key"
+                placeholderText: "from"
             }
 
             TextField {
                 id: toInput
                 Layout.fillWidth: true
-                placeholderText: "input key"
+                placeholderText: "to"
             }
 
 
@@ -161,7 +161,6 @@ ApplicationWindow {
         }
     }
 
-
     function orderDBGetList(group, from, to, callback) {
         var params = [group, from, to, ];
         readerClient.callRpcMethod("get.list", params, callback);
@@ -177,8 +176,8 @@ ApplicationWindow {
         readerClient.callRpcMethod("get.by.key", params, callback);
     }
 
-    function orderDBGetBySequence(group, sequenceId, callback) {
-        var params = [group, sequenceId];
+    function orderDBGetBySequence(group, seq, callback) {
+        var params = [group, seq];
         readerClient.callRpcMethod("get.by.sequence", params, callback);
     }
 

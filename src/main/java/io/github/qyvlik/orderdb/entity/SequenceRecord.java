@@ -4,18 +4,18 @@ import java.io.Serializable;
 
 public class SequenceRecord implements Serializable {
     private String group;
-    private Long sequenceId;
-    private String uniqueKey;
+    private Long seq;
+    private String key;
     private Object data;
 
     public SequenceRecord() {
 
     }
 
-    public SequenceRecord(String group, Long sequenceId, String uniqueKey, Object data) {
+    public SequenceRecord(String group, Long seq, String key, Object data) {
         this.group = group;
-        this.sequenceId = sequenceId;
-        this.uniqueKey = uniqueKey;
+        this.seq = seq;
+        this.key = key;
         this.data = data;
     }
 
@@ -27,20 +27,20 @@ public class SequenceRecord implements Serializable {
         this.group = group;
     }
 
-    public Long getSequenceId() {
-        return sequenceId;
+    public Long getSeq() {
+        return seq;
     }
 
-    public void setSequenceId(Long sequenceId) {
-        this.sequenceId = sequenceId;
+    public void setSeq(Long seq) {
+        this.seq = seq;
     }
 
-    public String getUniqueKey() {
-        return uniqueKey;
+    public String getKey() {
+        return key;
     }
 
-    public void setUniqueKey(String uniqueKey) {
-        this.uniqueKey = uniqueKey;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public Object getData() {

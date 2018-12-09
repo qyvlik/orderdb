@@ -24,7 +24,7 @@ order your record &amp; sub and push message
 }
 ```
 
-- `result`: the sequence number of the `uniqueKey`
+- `result`: the sequence number of the `key`
 
 ## get.by.sequence
 
@@ -46,15 +46,15 @@ response:
   "id": 10001,
   "method": "get.by.sequence",
   "result":{
-    "sequenceId": 1,
-    "uniqueKey": "action-1000",
+    "seq": 1,
+    "key": "action-1000",
     "data":{}
   }
 }
 ```
 
-- `sequenceId`: sequence number
-- `uniqueKey`: the unique key
+- `seq`: sequence number
+- `key`: the unique key
 - `data`: data
 
 ## get.by.key
@@ -77,15 +77,15 @@ response:
   "id": 10001,
   "method": "get.by.key",
   "result":{
-    "sequenceId": 1,
-    "uniqueKey": "action-1000",
+    "seq": 1,
+    "key": "action-1000",
     "data":{}
   }
 }
 ```
 
-- `sequenceId`: sequence number
-- `uniqueKey`: the unique key
+- `seq`: sequence number
+- `key`: the unique key
 - `data`: data
 
 ## get.latest.sequence
@@ -134,13 +134,13 @@ response
   "method": "get.by.key",
   "result":[
     {
-      "sequenceId": 1,
-      "uniqueKey": "action-1000",
+      "seq": 1,
+      "key": "action-1000",
       "data":{}
     },
     {
-      "sequenceId": 2,
-      "uniqueKey": "action-1001",
+      "seq": 2,
+      "key": "action-1001",
       "data":{}
     }
   ]
@@ -174,8 +174,8 @@ when some one call `sequence` for sequence some data, will receive the data as f
 {
   "channel": "sub.sequence",
   "result": {
-    "sequenceId": 2,
-    "uniqueKey": "action-1001",
+    "seq": 2,
+    "key": "action-1001",
     "data":{}
   }
 }

@@ -47,7 +47,7 @@ public class SequenceMethod extends RpcMethod {
             SequenceRecord record = sequenceService.sequence(group, key, data);
 
             if (record != null) {
-                responseObject.setResult(record.getSequenceId());
+                responseObject.setResult(record.getSeq());
                 sequenceRecordPush.submit(record);
             } else {
                 responseObject.setError(new ResponseError(500, "sequence failure"));
