@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +16,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
+import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 public class OrderDBFactory {
 
     public static final Set<String> BLACK_GROUP_NAMES =
             new TreeSet<String>(Lists.newArrayList("sys"));
 
+    public static final String GROUP_PREFIX = "group:";
+
     private final Map<String, DB> dbMap = Maps.newConcurrentMap();
+
+    private DB sysDB;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -45,19 +50,23 @@ public class OrderDBFactory {
     }
 
     public DB createDBByGroup(String group, boolean createIfMissing) {
+        return createDBByGroup(group, createIfMissing, false);
+    }
+
+    protected DB createDBByGroup(String group, boolean createIfMissing, boolean ignoreBlackList) {
         if (createIfMissing) {
-            return dbMap.computeIfAbsent(group, k -> createBucketInternal(group));
+            return dbMap.computeIfAbsent(group, k -> createBucketInternal(group, ignoreBlackList));
         } else {
             return dbMap.get(group);
         }
     }
 
-    private DB createBucketInternal(String group) {
+    private DB createBucketInternal(String group, boolean ignoreBlackList) {
         if (StringUtils.isBlank(group)) {
             throw new RuntimeException("createDBByGroup failure : group was empty");
         }
 
-        if (BLACK_GROUP_NAMES.contains(group)) {
+        if (!ignoreBlackList && BLACK_GROUP_NAMES.contains(group)) {
             throw new RuntimeException("createDBByGroup failure : group "
                     + group + " is in blacklist");
         }
@@ -93,7 +102,30 @@ public class OrderDBFactory {
             throw new RuntimeException(e);
         }
 
+        if (!BLACK_GROUP_NAMES.contains(group)) {
+            sysDB.put(bytes(GROUP_PREFIX + group), bytes(group));           // save group
+        }
+
         return db;
+    }
+
+    @PostConstruct
+    public void loadDBs() throws Exception {
+        sysDB = createDBByGroup("sys", true, true);
+
+        DBIterator iterator = sysDB.iterator();
+        try {
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                String key = asString(iterator.peekNext().getKey());
+                if (key.startsWith(GROUP_PREFIX)) {
+                    String value = asString(iterator.peekNext().getValue());
+                    createDBByGroup(value, true);
+                }
+            }
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            iterator.close();
+        }
     }
 
     @PreDestroy
