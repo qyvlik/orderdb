@@ -24,6 +24,5 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(orderDBDispatch, "/orderdb")
                 .setHandshakeHandler(new DefaultHandshakeHandler(new TomcatRequestUpgradeStrategy()))
                 .setAllowedOrigins("*");
-
     }
 }

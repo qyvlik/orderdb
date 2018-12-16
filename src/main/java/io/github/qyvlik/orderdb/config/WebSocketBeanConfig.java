@@ -1,16 +1,15 @@
 package io.github.qyvlik.orderdb.config;
 
-import io.github.qyvlik.jsonrpclite.core.common.ITaskQueue;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketDispatch;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketFilter;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
+import io.github.qyvlik.orderdb.method.executor.WritableExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -24,11 +23,6 @@ public class WebSocketBeanConfig {
     @Autowired
     private List<WebSocketFilter> filters;
 
-
-    @Autowired
-    @Qualifier("writeExecutor")
-    private Executor writeExecutor;
-
     @Bean("webSocketSessionContainer")
     public WebSocketSessionContainer webSocketSessionContainer() {
         return new WebSocketSessionContainer();
@@ -39,15 +33,20 @@ public class WebSocketBeanConfig {
         return Executors.newFixedThreadPool(4);
     }
 
-    @Bean("orderDBDispatch")
-    public WebSocketDispatch orderDBDispatch(@Autowired Executor webSocketExecutor,
-                                             @Autowired WebSocketSessionContainer webSocketSessionContainer) {
+    @Bean("recordPushExecutor")
+    public Executor recordPushExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
 
-        for (RpcMethod rpcMethod : rpcMethodList) {
-            if (rpcMethod.getGroup().equals("orderdb") && rpcMethod.getMethod().equals("orderdb.sequence")) {
-                rpcMethod.setExecutor(writeExecutor);
-            }
-        }
+    @Bean("writableExecutor")
+    public WritableExecutor writableExecutor() {
+        return new WritableExecutor();
+    }
+
+    @Bean("orderDBDispatch")
+    public WebSocketDispatch orderDBDispatch(
+            @Autowired @Qualifier("webSocketExecutor") Executor webSocketExecutor,
+            @Autowired @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer) {
 
         WebSocketDispatch webSocketDispatch = new WebSocketDispatch();
 
@@ -59,7 +58,6 @@ public class WebSocketBeanConfig {
 
         return webSocketDispatch;
     }
-
 
 
 }

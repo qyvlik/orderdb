@@ -19,8 +19,8 @@ public class SequenceService {
     public static final String KEY = "key:";
 
     @Autowired
-    @Qualifier("levelDB")
-    private DB levelDB;
+    @Qualifier("orderDBFactory")
+    private OrderDBFactory orderDBFactory;
 
     public byte[] valKey(String group, String key) {
         return bytes(KEY + group + ":" + key);
@@ -36,6 +36,8 @@ public class SequenceService {
 
     // use a single thread to write
     public SequenceRecord sequence(String group, String key, Object data) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, true);
+
         try {
             SequenceRecord record = getByKey(group, key);
 
@@ -82,7 +84,50 @@ public class SequenceService {
         }
     }
 
-    private SequenceRecord getByFullKey(byte[] valKey) {
+    public SequenceRecord getByKey(String group, String key) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, false);
+
+        if (levelDB == null) {
+            return null;
+        }
+
+        try {
+            return getByFullKey(levelDB, levelDB.get(valKey(group, key)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SequenceRecord getBySequence(String group, Long seqNum) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, false);
+
+        if (levelDB == null) {
+            return null;
+        }
+
+        try {
+            return getByFullKey(levelDB, valSeq(group, seqNum));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long getLatestSequence(String group) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, false);
+
+        if (levelDB == null) {
+            return 0L;
+        }
+
+        byte[] seqCounter = seqCounter(group);
+        String seqNumStr = asString(levelDB.get(seqCounter));
+        if (seqNumStr == null) {
+            return 0;
+        }
+        return Long.parseLong(seqNumStr);
+    }
+
+    private SequenceRecord getByFullKey(DB levelDB, byte[] valKey) {
         if (valKey == null) {
             return null;
         }
@@ -100,31 +145,4 @@ public class SequenceService {
             throw new RuntimeException(e);
         }
     }
-
-    public SequenceRecord getByKey(String group, String key) {
-        try {
-            return getByFullKey(levelDB.get(valKey(group, key)));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    public SequenceRecord getBySequence(String group, Long seqNum) {
-        try {
-            return getByFullKey(valSeq(group, seqNum));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public long getLatestSequence(String group) {
-        byte[] seqCounter = seqCounter(group);
-        String seqNumStr = asString(levelDB.get(seqCounter));
-        if (seqNumStr == null) {
-            return 0;
-        }
-        return Long.parseLong(seqNumStr);
-    }
-
 }

@@ -2,23 +2,28 @@ package io.github.qyvlik.orderdb.method.write;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.request.RequestObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParamCheckError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
 import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.method.async.SeqPushTask;
+import io.github.qyvlik.orderdb.method.executor.WritableExecutor;
 import io.github.qyvlik.orderdb.method.param.JSONObjectParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
-import io.github.qyvlik.orderdb.push.SequenceRecordPush;
 import io.github.qyvlik.orderdb.service.SequenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Service
 public class SequenceMethod extends RpcMethod {
@@ -29,7 +34,16 @@ public class SequenceMethod extends RpcMethod {
     private SequenceService sequenceService;
 
     @Autowired
-    private SequenceRecordPush sequenceRecordPush;
+    @Qualifier("recordPushExecutor")
+    private Executor recordPushExecutor;
+
+    @Autowired
+    @Qualifier("webSocketSessionContainer")
+    private WebSocketSessionContainer webSocketSessionContainer;
+
+    @Autowired
+    @Qualifier("writableExecutor")
+    private WritableExecutor writableExecutor;
 
     public SequenceMethod() {
         super("orderdb", "sequence", new RpcParams(
@@ -48,7 +62,7 @@ public class SequenceMethod extends RpcMethod {
 
             if (record != null) {
                 responseObject.setResult(record.getSeq());
-                sequenceRecordPush.submit(record);
+                recordPushExecutor.execute(new SeqPushTask(webSocketSessionContainer, record));
             } else {
                 responseObject.setError(new ResponseError(500, "sequence failure"));
             }
@@ -59,6 +73,17 @@ public class SequenceMethod extends RpcMethod {
         }
 
         return responseObject;
+    }
+
+    @Override
+    public Executor getExecutorByRequest(RequestObject requestObject) {
+        RpcParamCheckError checkParamResult = checkParams(requestObject);
+
+        if (checkParamResult != null) {
+            return null;
+        }
+
+        return writableExecutor.getByGroup(requestObject.getParams().get(0).toString());
     }
 
     @Override

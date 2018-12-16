@@ -12,7 +12,6 @@ ApplicationWindow {
     visible: true
     title: qsTr("orderdb-client")
 
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 10
@@ -24,6 +23,13 @@ ApplicationWindow {
                 writeClient.active = !writeClient.active;
                 readerClient.active = !readerClient.active;
             }
+        }
+
+        TextField {
+            Layout.fillWidth: true
+            id: groupInput
+            text: "test"
+            placeholderText: "input group"
         }
 
         RowLayout {
@@ -38,7 +44,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.by.sequence"
                 onClicked: {
-                    orderDBGetBySequence("test", sequenceInput.text, function(res){
+                    orderDBGetBySequence(groupInput.text, sequenceInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -57,7 +63,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.by.key"
                 onClicked: {
-                    orderDBGetByKey("test", keyInput.text, function(res){
+                    orderDBGetByKey(groupInput.text, keyInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -83,7 +89,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.by.key"
                 onClicked: {
-                    orderDBGetList("test", fromInput.text, toInput.text, function(res){
+                    orderDBGetList(groupInput.text, fromInput.text, toInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -97,7 +103,7 @@ ApplicationWindow {
             property bool subscribe: false
             onClicked: {
                 subscribeButton.subscribe = !subscribeButton.subscribe;
-                orderDBSubSequence("test", subscribeButton.subscribe, function(res){
+                orderDBSubSequence(groupInput.text, subscribeButton.subscribe, function(res){
                     if (res.error) {
                         console.error("orderDBSubSequence error:" + JSON.stringify(res));
                         return;
@@ -116,7 +122,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             text: "get latest sequence"
             onClicked: {
-                orderDBGetLatestSequence("test", function(res){
+                orderDBGetLatestSequence(groupInput.text, function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
@@ -150,7 +156,7 @@ ApplicationWindow {
 
     function batchSeq(currentId, count) {
         while(count -- > 0) {
-            orderDBSequence("test",
+            orderDBSequence(groupInput.text,
                             "submit-" + (currentId+count),
                             {
                                 id: currentId+count,

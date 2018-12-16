@@ -165,8 +165,10 @@ public class WebSocketDispatch extends TextWebSocketHandler {
             return;
         }
 
-        Executor methodExecutor = rpcMethod.getExecutor() != null ?
-                rpcMethod.getExecutor() : executor;
+        Executor methodInternalExecutor = rpcMethod.getExecutorByRequest(requestObject);
+
+        Executor methodExecutor = methodInternalExecutor != null ?
+                methodInternalExecutor : executor;
 
         methodExecutor.execute(new Runnable() {
             @Override
