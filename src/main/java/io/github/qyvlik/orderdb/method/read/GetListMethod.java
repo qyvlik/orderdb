@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 public class GetListMethod extends RpcMethod {
-    private Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private SequenceService sequenceService;
 

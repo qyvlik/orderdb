@@ -1,7 +1,12 @@
 
 
 orderdb:
-  directory: orderdb
+  disk:
+    directory: orderdb
+    groupLimit: 32
+  admin:
+    checkPassword: false
+    password: orderdb2018
 
 server:
   port: 17711

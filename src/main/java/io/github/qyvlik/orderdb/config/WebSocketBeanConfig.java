@@ -33,16 +33,6 @@ public class WebSocketBeanConfig {
         return Executors.newFixedThreadPool(4);
     }
 
-    @Bean("recordPushExecutor")
-    public Executor recordPushExecutor() {
-        return Executors.newSingleThreadExecutor();
-    }
-
-    @Bean("writableExecutor")
-    public WritableExecutor writableExecutor() {
-        return new WritableExecutor();
-    }
-
     @Bean("orderDBDispatch")
     public WebSocketDispatch orderDBDispatch(
             @Autowired @Qualifier("webSocketExecutor") Executor webSocketExecutor,

@@ -59,6 +59,9 @@ WebSocket {
             var rpcCB = rpcCallback[obj.id];
             if (typeof rpcCB !== 'undefined') {
                 rpcCB(obj);
+
+//                rpcCallback[obj.id] = undefined;
+
             } else {
                 console.error("have not id:" + obj.id + " callback, method: "  + obj.method)
             }

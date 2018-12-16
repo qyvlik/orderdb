@@ -146,7 +146,7 @@ ApplicationWindow {
         running: false
         repeat: true
         onTriggered: {
-            var size = 10;
+            var size = 1000;
             console.time("batchSeq")
             batchSeq(currentId, size);
             currentId += size;

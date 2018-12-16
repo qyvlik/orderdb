@@ -2,6 +2,7 @@ package io.github.qyvlik.orderdb.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.github.qyvlik.orderdb.utils.SecurityDataHashUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
@@ -24,6 +25,7 @@ public class OrderDBFactory {
             new TreeSet<String>(Lists.newArrayList("sys"));
 
     public static final String GROUP_PREFIX = "group:";
+    public static final String USER_PREFIX = "user:";
 
     private final Map<String, DB> dbMap = Maps.newConcurrentMap();
 
@@ -31,25 +33,43 @@ public class OrderDBFactory {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String orderDBDirectory;
+    private String orderDBDiskDirectory;
+    private Long orderDBDiskGroupLimit;
+    private String initPassword;
 
     public OrderDBFactory() {
 
     }
 
-    public OrderDBFactory(String orderDBDirectory) {
-        this.orderDBDirectory = orderDBDirectory;
+    public OrderDBFactory(String orderDBDiskDirectory, Long orderDBDiskGroupLimit, String initPassword) {
+        this.orderDBDiskDirectory = orderDBDiskDirectory;
+        this.orderDBDiskGroupLimit = orderDBDiskGroupLimit;
+        this.initPassword = initPassword;
     }
 
-    public String getOrderDBDirectory() {
-        return orderDBDirectory;
+    public String getOrderDBDiskDirectory() {
+        return orderDBDiskDirectory;
     }
 
-    public void setOrderDBDirectory(String orderDBDirectory) {
-        this.orderDBDirectory = orderDBDirectory;
+    public Long getOrderDBDiskGroupLimit() {
+        return orderDBDiskGroupLimit;
+    }
+
+    public DB getSysDB() {
+        return sysDB;
+    }
+
+    public Map<String, DB> getDbMap() {
+        return dbMap;
     }
 
     public DB createDBByGroup(String group, boolean createIfMissing) {
+        // not include `sys`
+        if (getOrderDBDiskGroupLimit() < dbMap.size() - 1) {
+            throw new RuntimeException("createDBByGroup failure : group count more than "
+                    + orderDBDiskGroupLimit);
+        }
+
         return createDBByGroup(group, createIfMissing, false);
     }
 
@@ -76,8 +96,8 @@ public class OrderDBFactory {
                     + group + " contains invalidate character");
         }
 
-        if (StringUtils.isBlank(getOrderDBDirectory())) {
-            throw new RuntimeException("createDBByGroup failure : orderDBDirectory was empty");
+        if (StringUtils.isBlank(getOrderDBDiskDirectory())) {
+            throw new RuntimeException("createDBByGroup failure : orderDBDiskDirectory was empty");
         }
 
         DB db = null;
@@ -85,7 +105,7 @@ public class OrderDBFactory {
         Options options = new Options();
         options.createIfMissing(true);
 
-        String directory = getOrderDBDirectory();
+        String directory = getOrderDBDiskDirectory();
 
         String groupDirectory;
 
@@ -109,9 +129,55 @@ public class OrderDBFactory {
         return db;
     }
 
+    public boolean checkPassword(String username, String password) {
+        byte[] usernameBytes = bytes(USER_PREFIX + username);
+        String passwordHashInDB = asString(sysDB.get(usernameBytes));
+        try {
+            String passwordHash = SecurityDataHashUtils.createHash(password);
+            return passwordHashInDB.equals(passwordHash);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean updatePassword(String username, String oldPassword, String newPassword) {
+        if (!checkPassword(username, oldPassword)) {
+            return false;
+        }
+
+        byte[] usernameBytes = bytes(USER_PREFIX + username);
+
+        try {
+            String passwordHash = SecurityDataHashUtils.createHash(newPassword);
+            sysDB.put(usernameBytes, bytes(passwordHash));
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createUser(String username, String password) {
+        byte[] usernameBytes = bytes(USER_PREFIX + username);
+        String passwordHashInDB = asString(sysDB.get(usernameBytes));
+        if (StringUtils.isBlank(passwordHashInDB)) {
+            try {
+                String passwordHash = SecurityDataHashUtils.createHash(password);
+                sysDB.put(usernameBytes, bytes(passwordHash));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void createAdminUser() {
+        createUser("admin", this.initPassword);
+    }
+
     @PostConstruct
     public void loadDBs() throws Exception {
         sysDB = createDBByGroup("sys", true, true);
+
+        createAdminUser();      // init password
 
         DBIterator iterator = sysDB.iterator();
         try {
