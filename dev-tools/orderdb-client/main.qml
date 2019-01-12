@@ -35,16 +35,16 @@ ApplicationWindow {
         RowLayout {
             Layout.fillWidth: true
             TextField {
-                id: sequenceInput
+                id: indexInput
                 Layout.fillWidth: true
-                placeholderText: "input sequence"
+                placeholderText: "input index"
             }
 
             Button {
                 Layout.fillWidth: true
-                text: "get.by.sequence"
+                text: "get.by.index"
                 onClicked: {
-                    orderDBGetBySequence(groupInput.text, sequenceInput.text, function(res){
+                    orderDBGetByIndex(groupInput.text, indexInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -103,9 +103,9 @@ ApplicationWindow {
             property bool subscribe: false
             onClicked: {
                 subscribeButton.subscribe = !subscribeButton.subscribe;
-                orderDBSubSequence(groupInput.text, subscribeButton.subscribe, function(res){
+                orderDBSubAppend(groupInput.text, subscribeButton.subscribe, function(res){
                     if (res.error) {
-                        console.error("orderDBSubSequence error:" + JSON.stringify(res));
+                        console.error("orderDBSubAppend error:" + JSON.stringify(res));
                         return;
                     }
 
@@ -113,16 +113,16 @@ ApplicationWindow {
                         return;
                     }
 
-                    console.info("orderDBSubSequence: " + JSON.stringify(res));
+                    console.info("orderDBSubAppend: " + JSON.stringify(res));
                 });
             }
         }
 
         Button {
             Layout.fillWidth: true
-            text: "get latest sequence"
+            text: "get latest index"
             onClicked: {
-                orderDBGetLatestSequence(groupInput.text, function(res){
+                orderDBGetLatestIndex(groupInput.text, function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
@@ -156,7 +156,7 @@ ApplicationWindow {
 
     function batchSeq(currentId, count) {
         while(count -- > 0) {
-            orderDBSequence(groupInput.text,
+            orderDBAppend(groupInput.text,
                             "submit-" + (currentId+count),
                             {
                                 id: currentId+count,
@@ -172,9 +172,9 @@ ApplicationWindow {
         readerClient.callRpcMethod("get.list", params, callback);
     }
 
-    function orderDBGetLatestSequence(group, callback) {
+    function orderDBGetLatestIndex(group, callback) {
         var params = [group];
-        readerClient.callRpcMethod("get.latest.sequence", params, callback);
+        readerClient.callRpcMethod("get.latest.index", params, callback);
     }
 
     function orderDBGetByKey(group, key, callback) {
@@ -182,19 +182,19 @@ ApplicationWindow {
         readerClient.callRpcMethod("get.by.key", params, callback);
     }
 
-    function orderDBGetBySequence(group, seq, callback) {
-        var params = [group, seq];
-        readerClient.callRpcMethod("get.by.sequence", params, callback);
+    function orderDBGetByIndex(group, index, callback) {
+        var params = [group, index];
+        readerClient.callRpcMethod("get.by.index", params, callback);
     }
 
-    function orderDBSequence(group, key, value, callback) {
+    function orderDBAppend(group, key, value, callback) {
         var params =  [group, key, value];
-        writeClient.callRpcMethod("sequence", params, callback)
+        writeClient.callRpcMethod("append", params, callback)
     }
 
-    function orderDBSubSequence(group, subscribe, callback) {
+    function orderDBSubAppend(group, subscribe, callback) {
         var params = [group];
-        readerClient.subChannel("sub.sequence", params, subscribe, callback);
+        readerClient.subChannel("sub.append", params, subscribe, callback);
     }
 
     RpcClient {

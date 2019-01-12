@@ -34,12 +34,12 @@ public class GetListMethod extends RpcMethod {
     private ResponseObject<List<QueueUpRecord>> getList(String group, Long from, Long to) {
         ResponseObject<List<QueueUpRecord>> responseObject = new ResponseObject<>();
 
-        if (from == null || from <= 0) {
+        if (from == null || from < 0) {
             responseObject.setError(new ResponseError(400, "from must bigger than zero"));
             return responseObject;
         }
 
-        if (to == null || to <= 0) {
+        if (to == null || to < 0) {
             responseObject.setError(new ResponseError(400, "to must bigger than zero"));
             return responseObject;
         }
