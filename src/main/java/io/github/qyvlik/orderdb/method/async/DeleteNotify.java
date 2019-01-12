@@ -4,26 +4,26 @@ import com.alibaba.fastjson.JSON;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
 import io.github.qyvlik.jsonrpclite.core.jsonsub.pub.ChannelMessage;
 import io.github.qyvlik.jsonrpclite.core.jsonsub.sub.ChannelSession;
-import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.socket.TextMessage;
 
 import java.util.List;
 
-public class SeqPushTask implements Runnable {
+public class DeleteNotify implements Runnable {
 
-    private SequenceRecord sequenceRecord;
+    private QueueUpRecord record;
     private WebSocketSessionContainer webSocketSessionContainer;
 
-    public SeqPushTask(WebSocketSessionContainer webSocketSessionContainer, SequenceRecord sequenceRecord) {
-        this.sequenceRecord = sequenceRecord;
+    public DeleteNotify(WebSocketSessionContainer webSocketSessionContainer, QueueUpRecord record) {
+        this.record = record;
         this.webSocketSessionContainer = webSocketSessionContainer;
     }
 
     @Override
     public void run() {
         List<ChannelSession> sessionList =
-                webSocketSessionContainer.getSessionListFromChannel("sub.sequence");
+                webSocketSessionContainer.getSessionListFromChannel("sub.delete");
 
         if (sessionList == null || sessionList.size() == 0) {
             return;
@@ -47,9 +47,9 @@ public class SeqPushTask implements Runnable {
                 continue;
             }
 
-            ChannelMessage<SequenceRecord> message = new ChannelMessage<>();
-            message.setChannel("sub.sequence");
-            message.setResult(sequenceRecord);
+            ChannelMessage<QueueUpRecord> message = new ChannelMessage<>();
+            message.setChannel("sub.delete");
+            message.setResult(record);
 
             webSocketSessionContainer.safeSend(
                     session.getWebSocketSession(),

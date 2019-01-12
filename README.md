@@ -2,12 +2,12 @@
 
 order your record &amp; sub and push message
 
-## sequence
+## append
 
 ```json
 {
   "id": 10001,
-  "method": "sequence",
+  "method": "append",
   "params":["test", "action-1000", {}]
 }
 ```
@@ -19,43 +19,43 @@ order your record &amp; sub and push message
 ```json
 {
   "id": 10001,
-  "method": "sequence",
+  "method": "append",
   "result": 1
 }
 ```
 
-- `result`: the sequence number of the `key`
+- `result`: the index of the `key`
 
-## get.by.sequence
+## get.by.index
 
 ```json
 {
   "id": 10001,
-  "method": "get.by.sequence",
+  "method": "get.by.index",
   "params":["test", 1]
 }
 ```
 
 - `group`: group of your data
-- `seuqnce`: sequence number of data
+- `index`: index of data
 
 response:
 
 ```json
 {
   "id": 10001,
-  "method": "get.by.sequence",
+  "method": "get.by.index",
   "result":{
     "group": "test",
-    "seq": 1,
     "key": "action-1000",
+    "index": 1,
     "data":{}
   }
 }
 ```
 
-- `seq`: sequence number
 - `key`: the unique key
+- `index`: index number
 - `data`: data
 
 ## get.by.key
@@ -79,23 +79,23 @@ response:
   "method": "get.by.key",
   "result":{
     "group": "test",
-    "seq": 1,
     "key": "action-1000",
+    "index": 1,
     "data":{}
   }
 }
 ```
 
-- `seq`: sequence number
 - `key`: the unique key
+- `index`: index number
 - `data`: data
 
-## get.latest.sequence
+## get.latest.index
 
 ```json
 {
   "id": 10001,
-  "method": "get.latest.sequence",
+  "method": "get.latest.index",
   "params": ["test"]
 }
 ```
@@ -107,12 +107,12 @@ response
 ```json
 {
   "id": 10001,
-  "method": "get.latest.sequence",
+  "method": "get.latest.index",
   "result": 1
 }
 ```
 
-return the latest sequence number.
+return the latest index number.
 
 ## get.list
 
@@ -125,8 +125,8 @@ return the latest sequence number.
 ```
 
 - `group`: group of your data
-- `from`: sequence number which is start
-- `to`: sequence number which is end
+- `from`: index which is start
+- `to`: index which is end
 
 response
 
@@ -137,25 +137,25 @@ response
   "result":[
     {
       "group": "test",
-      "seq": 1,
       "key": "action-1000",
+      "index": 1,
       "data":{}
     },
     {
       "group": "test",
-      "seq": 2,
       "key": "action-1001",
+      "index": 2,
       "data":{}
     }
   ]
 }
 ```
 
-## sub.sequence
+## sub.append
 
 ```json
 {
-  "channel": "sub.sequence",
+  "channel": "sub.append",
   "subscribe": true,
   "params": ["test"]
 }
@@ -167,20 +167,55 @@ if you subscribe success, response as follow
 
 ```json
 {
-  "channel": "sub.sequence",
+  "channel": "sub.append",
   "result": "subscribe"
 }
 ```
 
-when some one call `sequence` for sequence some data, will receive the data as follow
+when some one call `append` for order some data, will receive the data as follow
 
 ```json
 {
-  "channel": "sub.sequence",
+  "channel": "sub.append",
   "result": {
     "group": "test",
-    "seq": 2,
     "key": "action-1001",
+    "index": 2,
+    "data":{}
+  }
+}
+```
+
+## sub.delete
+
+```json
+{
+  "channel": "sub.delete",
+  "subscribe": true,
+  "params": ["test"]
+}
+```
+
+- `group`: which group you want subscribe.
+
+if you subscribe success, response as follow
+
+```json
+{
+  "channel": "sub.delete",
+  "result": "subscribe"
+}
+```
+
+when some one call `delete some data, will receive the data as follow
+
+```json
+{
+  "channel": "sub.delete",
+  "result": {
+    "group": "test",
+    "key": "action-1001",
+    "index": 2,
     "data":{}
   }
 }

@@ -22,7 +22,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 public class OrderDBFactory {
 
     public static final Set<String> BLACK_GROUP_NAMES =
-            new TreeSet<String>(Lists.newArrayList("sys"));
+            new TreeSet<String>(Lists.newArrayList("sys", "binlog"));
 
     public static final String GROUP_PREFIX = "group:";
     public static final String USER_PREFIX = "user:";

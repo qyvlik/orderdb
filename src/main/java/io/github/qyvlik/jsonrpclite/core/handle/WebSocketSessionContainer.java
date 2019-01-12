@@ -84,7 +84,7 @@ public class WebSocketSessionContainer {
         try {
             sessionDecoratorMap.computeIfAbsent(
                     session.getId(),
-                    k -> new ConcurrentWebSocketSessionDecorator(session, 1000, 1000000))
+                    k -> new ConcurrentWebSocketSessionDecorator(session, 1000, 100000))
                     .sendMessage(webSocketMessage);
             return true;
         } catch (Exception e) {

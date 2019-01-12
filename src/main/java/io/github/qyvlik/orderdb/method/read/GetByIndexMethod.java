@@ -6,10 +6,10 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
-import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import io.github.qyvlik.orderdb.method.param.LongParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
-import io.github.qyvlik.orderdb.service.SequenceService;
+import io.github.qyvlik.orderdb.service.QueueUpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +19,24 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class GetBySequenceMethod extends RpcMethod {
+public class GetByIndexMethod extends RpcMethod {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private SequenceService sequenceService;
+    private QueueUpService queueUpService;
 
-    public GetBySequenceMethod() {
-        super("orderdb", "get.by.sequence", new RpcParams(
+    public GetByIndexMethod() {
+        super("orderdb", "get.by.index", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group"),
-                        new LongParam("sequence")
+                        new LongParam("index")
                 )));
     }
 
-    public ResponseObject<SequenceRecord> getValueByUniqueKey(String group, Long sequence) {
-        ResponseObject<SequenceRecord> responseObject = new ResponseObject<>();
+    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String group, Long sequence) {
+        ResponseObject<QueueUpRecord> responseObject = new ResponseObject<>();
         try {
-            SequenceRecord record = sequenceService.getBySequence(group, sequence);
+            QueueUpRecord record = queueUpService.getByGroupAndIndex(group, sequence);
             responseObject.setResult(record);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());

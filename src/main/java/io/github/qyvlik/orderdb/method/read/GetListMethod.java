@@ -6,12 +6,10 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
-import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import io.github.qyvlik.orderdb.method.param.LongParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
-import io.github.qyvlik.orderdb.service.SequenceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.qyvlik.orderdb.service.QueueUpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
@@ -22,7 +20,7 @@ import java.util.List;
 public class GetListMethod extends RpcMethod {
 
     @Autowired
-    private SequenceService sequenceService;
+    private QueueUpService queueUpService;
 
     public GetListMethod() {
         super("orderdb", "get.list", new RpcParams(
@@ -33,8 +31,8 @@ public class GetListMethod extends RpcMethod {
                 )));
     }
 
-    private ResponseObject<List<SequenceRecord>> getList(String group, Long from, Long to) {
-        ResponseObject<List<SequenceRecord>> responseObject = new ResponseObject<List<SequenceRecord>>();
+    private ResponseObject<List<QueueUpRecord>> getList(String group, Long from, Long to) {
+        ResponseObject<List<QueueUpRecord>> responseObject = new ResponseObject<>();
 
         if (from == null || from <= 0) {
             responseObject.setError(new ResponseError(400, "from must bigger than zero"));
@@ -59,12 +57,12 @@ public class GetListMethod extends RpcMethod {
 
         long seek = from;
 
-        List<SequenceRecord> list = Lists.newLinkedList();
+        List<QueueUpRecord> list = Lists.newLinkedList();
 
         do {
-            SequenceRecord sequenceRecord = sequenceService.getBySequence(group, seek);
-            if (sequenceRecord != null) {
-                list.add(sequenceRecord);
+            QueueUpRecord record = queueUpService.getByGroupAndIndex(group, seek);
+            if (record != null) {
+                list.add(record);
             }
         } while (seek++ < to);
 

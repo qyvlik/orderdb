@@ -7,7 +7,7 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
 import io.github.qyvlik.orderdb.method.param.StringParam;
-import io.github.qyvlik.orderdb.service.SequenceService;
+import io.github.qyvlik.orderdb.service.QueueUpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,10 @@ public class GetLatestSequence extends RpcMethod {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private SequenceService sequenceService;
+    private QueueUpService queueUpService;
 
     public GetLatestSequence() {
-        super("orderdb", "get.latest.sequence", new RpcParams(
+        super("orderdb", "get.latest.index", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group")
                 )));
@@ -35,8 +35,8 @@ public class GetLatestSequence extends RpcMethod {
         ResponseObject<Long> responseObject = new ResponseObject<Long>();
 
         try {
-            long seq = sequenceService.getLatestSequence(group);
-            responseObject.setResult(seq);
+            long index = queueUpService.getLastIndexByGroup(group);
+            responseObject.setResult(index);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
             responseObject.setError(new ResponseError(500, e.getMessage()));

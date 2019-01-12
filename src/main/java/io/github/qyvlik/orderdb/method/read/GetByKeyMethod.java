@@ -6,9 +6,9 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
-import io.github.qyvlik.orderdb.entity.SequenceRecord;
+import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import io.github.qyvlik.orderdb.method.param.StringParam;
-import io.github.qyvlik.orderdb.service.SequenceService;
+import io.github.qyvlik.orderdb.service.QueueUpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class GetByKeyMethod extends RpcMethod {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private SequenceService sequenceService;
+    private QueueUpService queueUpService;
 
     public GetByKeyMethod() {
         super("orderdb", "get.by.key", new RpcParams(
@@ -33,10 +33,10 @@ public class GetByKeyMethod extends RpcMethod {
                 )));
     }
 
-    public ResponseObject<SequenceRecord> getValueByUniqueKey(String group, String key) {
-        ResponseObject<SequenceRecord> responseObject = new ResponseObject<>();
+    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String group, String key) {
+        ResponseObject<QueueUpRecord> responseObject = new ResponseObject<>();
         try {
-            SequenceRecord record = sequenceService.getByKey(group, key);
+            QueueUpRecord record = queueUpService.getByGroupAndKey(group, key);
             responseObject.setResult(record);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
