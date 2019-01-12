@@ -5,13 +5,14 @@ COPY src/ src/
 VOLUME /var/maven/.m2
 RUN mvn -DskipTests clean package
 
-#FROM frolvlad/alpine-oraclejdk8
-FROM library/openjdk:8-alpine
-MAINTAINER "<qyvlik@qq.com>"
+FROM frolvlad/alpine-oraclejdk8
+MAINTAINER "test <qyvlik@qq.com>"
+VOLUME /tmp
 WORKDIR /home/www
+ADD target/*.jar /home/www/app.jar
 RUN adduser -D -u 1000 www www \
     && chown www:www -R /home/www
-COPY --from=builder target/*.jar app.jar
 EXPOSE 8080
 USER www
-ENTRYPOINT ["java", "-jar", "/home/www/app.jar"]
+ENV JAVA_OPTS=""
+ENTRYPOINT exec java $JAVA_OPTS -jar /home/www/app.jar

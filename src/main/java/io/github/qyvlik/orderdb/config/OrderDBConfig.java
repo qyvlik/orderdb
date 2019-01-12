@@ -21,7 +21,6 @@ public class OrderDBConfig {
     @Value("${orderdb.admin.password}")
     private String orderDBAdminPassword;
 
-
     @Bean("recordPushExecutor")
     public Executor recordPushExecutor() {
         return Executors.newSingleThreadExecutor();

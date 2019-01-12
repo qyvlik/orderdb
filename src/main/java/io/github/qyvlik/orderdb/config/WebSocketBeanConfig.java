@@ -4,9 +4,9 @@ import io.github.qyvlik.jsonrpclite.core.handle.WebSocketDispatch;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketFilter;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
-import io.github.qyvlik.orderdb.method.executor.WritableExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,6 +23,9 @@ public class WebSocketBeanConfig {
     @Autowired
     private List<WebSocketFilter> filters;
 
+    @Value("${orderdb.thread.read}")
+    private Integer orderDbThreadRead;
+
     @Bean("webSocketSessionContainer")
     public WebSocketSessionContainer webSocketSessionContainer() {
         return new WebSocketSessionContainer();
@@ -30,7 +33,11 @@ public class WebSocketBeanConfig {
 
     @Bean("webSocketExecutor")
     public Executor webSocketExecutor() {
-        return Executors.newFixedThreadPool(4);
+        if (orderDbThreadRead == null || orderDbThreadRead <= 0) {
+            return Executors.newCachedThreadPool();
+        }
+
+        return Executors.newFixedThreadPool(orderDbThreadRead);
     }
 
     @Bean("orderDBDispatch")
