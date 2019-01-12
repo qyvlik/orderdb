@@ -10,7 +10,7 @@ docekr run -d \
 --name myorderdb \
 -v /home/www/orderdb:/home/www/orderdb \
 -p 17711:17711 \
-qyvlik/orderdb --orderdb.directory=/home/www/orderdb
+qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 ```
 
 ##
