@@ -17,12 +17,6 @@ import java.util.concurrent.Executors;
 @Configuration
 public class WebSocketBeanConfig {
 
-    @Autowired
-    private List<RpcMethod> rpcMethodList;
-
-    @Autowired
-    private List<WebSocketFilter> filters;
-
     @Value("${orderdb.thread.read}")
     private Integer orderDbThreadRead;
 
@@ -43,7 +37,10 @@ public class WebSocketBeanConfig {
     @Bean("orderDBDispatch")
     public WebSocketDispatch orderDBDispatch(
             @Autowired @Qualifier("webSocketExecutor") Executor webSocketExecutor,
-            @Autowired @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer) {
+            @Autowired @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer,
+            @Autowired List<RpcMethod> rpcMethodList,
+            @Autowired List<WebSocketFilter> filters
+    ) {
 
         WebSocketDispatch webSocketDispatch = new WebSocketDispatch();
 
