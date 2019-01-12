@@ -7,8 +7,9 @@ RUN mvn -DskipTests clean package
 
 FROM frolvlad/alpine-oraclejdk8
 MAINTAINER "test <qyvlik@qq.com>"
-VOLUME /tmp
 WORKDIR /home/www
+VOLUME /tmp
+VOLUME /home/www/orderdb
 ADD target/*.jar /home/www/app.jar
 RUN adduser -D -u 1000 www www \
     && chown www:www -R /home/www

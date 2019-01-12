@@ -2,6 +2,19 @@
 
 order your record &amp; sub and push message
 
+## docker build
+
+```bash
+docker pull qyvlik/orderdb
+docekr run -d \
+--name myorderdb \
+-v /home/www/orderdb:/home/www/orderdb \
+-p 17711:17711 \
+qyvlik/orderdb
+```
+
+##
+
 ## append
 
 ```json
