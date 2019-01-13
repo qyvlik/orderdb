@@ -6,14 +6,22 @@ VOLUME /var/maven/.m2
 RUN mvn -DskipTests clean package
 
 FROM frolvlad/alpine-oraclejdk8
+
 MAINTAINER "test <qyvlik@qq.com>"
+
 WORKDIR /home/www
 VOLUME /tmp
 VOLUME /home/www/orderdb
-ADD target/*.jar /home/www/app.jar
+
+COPY --from=builder target/*.jar app.jar
+
 RUN adduser -D -u 1000 www www \
     && chown www:www -R /home/www
-EXPOSE 8080
+
+EXPOSE 17711
+
 USER www
+
 ENV JAVA_OPTS=""
+
 ENTRYPOINT exec java $JAVA_OPTS -jar /home/www/app.jar
