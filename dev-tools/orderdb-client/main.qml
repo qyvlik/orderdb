@@ -87,7 +87,7 @@ ApplicationWindow {
 
             Button {
                 Layout.fillWidth: true
-                text: "get.by.key"
+                text: "get.list"
                 onClicked: {
                     orderDBGetList(groupInput.text, fromInput.text, toInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
@@ -118,6 +118,7 @@ ApplicationWindow {
             }
         }
 
+
         Button {
             Layout.fillWidth: true
             text: "get latest index"
@@ -133,6 +134,23 @@ ApplicationWindow {
             text: "timer:" + timer.running
             onClicked: timer.running = !timer.running
         }
+
+        Button {
+            Layout.fillWidth: true
+            text: "append.list"
+            onClicked: {
+                var list = [
+                            {'group':'test', 'key': 'key1', 'data':{}},
+                            {'group':'test', 'key': 'key1', 'data':{}},
+                            {'group':'test', 'key': 'key2', 'data':{}}
+                        ];
+                orderDBAppendList("test", true, list, function(res){
+                    console.log("res:" + JSON.stringify(res))
+                });
+            }
+        }
+
+
 
         Item {
             Layout.fillHeight: true
@@ -190,6 +208,11 @@ ApplicationWindow {
     function orderDBAppend(group, key, value, callback) {
         var params =  [group, key, value];
         writeClient.callRpcMethod("append", params, callback)
+    }
+
+    function orderDBAppendList(group, ignoreExist, list, callback) {
+        var params =  [group, ignoreExist, list];
+        writeClient.callRpcMethod("append.list", params, callback)
     }
 
     function orderDBSubAppend(group, subscribe, callback) {

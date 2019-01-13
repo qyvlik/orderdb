@@ -15,6 +15,7 @@ import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import io.github.qyvlik.orderdb.entity.SimpleAppendResult;
 import io.github.qyvlik.orderdb.method.async.AppendNotify;
 import io.github.qyvlik.orderdb.method.executor.WritableExecutor;
+import io.github.qyvlik.orderdb.method.param.BooleanParam;
 import io.github.qyvlik.orderdb.method.param.ListParam;
 import io.github.qyvlik.orderdb.method.param.StringParam;
 import io.github.qyvlik.orderdb.service.QueueUpService;
@@ -50,7 +51,7 @@ public class AppendListMethod extends RpcMethod {
         super("orderdb", "append.list", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group"),
-                        new StringParam("ignoreExist"),
+                        new BooleanParam("ignoreExist"),
                         new ListParam("list")
                 )));
     }

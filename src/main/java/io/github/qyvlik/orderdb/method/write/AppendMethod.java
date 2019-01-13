@@ -52,7 +52,7 @@ public class AppendMethod extends RpcMethod {
                 )));
     }
 
-    public ResponseObject<Long> orderDBSequence(String group, String key, Object data) {
+    public ResponseObject<Long> orderDBAppend(String group, String key, Object data) {
         ResponseObject<Long> responseObject = new ResponseObject<>();
 
         try {
@@ -93,6 +93,6 @@ public class AppendMethod extends RpcMethod {
         String key = params.get(1).toString();
         JSONObject data = (JSONObject) params.get(2);
 
-        return orderDBSequence(group, key, data);
+        return orderDBAppend(group, key, data);
     }
 }
