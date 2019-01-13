@@ -6,7 +6,7 @@ order your record &amp; sub and push message
 
 ```bash
 docker pull qyvlik/orderdb
-docekr run -d \
+docker run -d \
 --name myorderdb \
 -v /home/www/orderdb:/home/www/orderdb \
 -p 17711:17711 \
