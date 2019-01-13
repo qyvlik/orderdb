@@ -7,8 +7,8 @@ import QtQuick.Layouts 1.3
 
 
 ApplicationWindow {
-    width: 640
-    height: 720
+    width: 360
+    height: 640
     visible: true
     title: qsTr("orderdb-client")
 
@@ -131,6 +131,16 @@ ApplicationWindow {
 
         Button {
             Layout.fillWidth: true
+            text: "sys.state"
+            onClicked: {
+                orderDBSysState(groupInput.text, function(res){
+                    console.log("res:" + JSON.stringify(res))
+                });
+            }
+        }
+
+        Button {
+            Layout.fillWidth: true
             text: "timer:" + timer.running
             onClicked: timer.running = !timer.running
         }
@@ -163,7 +173,7 @@ ApplicationWindow {
         running: false
         repeat: true
         onTriggered: {
-            var size = 1000;
+            var size = 100;
             console.time("batchSeq");
             var currentId = (new Date()).getTime() * 10000;
             batchSeq(currentId, size);
@@ -208,6 +218,11 @@ ApplicationWindow {
         writeClient.callRpcMethod("append", params, callback)
     }
 
+    function orderDBSysState(group, callback) {
+        var params =  [group];
+        writeClient.callRpcMethod("sys.state", params, callback)
+    }
+
     function orderDBAppendList(group, ignoreExist, list, callback) {
         var params =  [group, ignoreExist, list];
         writeClient.callRpcMethod("append.list", params, callback)
@@ -218,15 +233,9 @@ ApplicationWindow {
         readerClient.subChannel("sub.append", params, subscribe, callback);
     }
 
-    function orderDBSysState(group, callback) {
-        var params =  [group];
-        writeClient.callRpcMethod("sys.state", params, callback)
-    }
-
     RpcClient {
         id: writeClient
-        url : "ws://120.79.231.205:17711/orderdb"
-//        url: "ws://localhost:17711/orderdb"
+        url: "ws://localhost:17711/orderdb"
 
         onErrorStringChanged: {
             console.error("writeClient:", errorString)
@@ -235,8 +244,7 @@ ApplicationWindow {
 
     RpcClient {
         id: readerClient
-        url : "ws://120.79.231.205:17711/orderdb"
-//        url: "ws://localhost:17711/orderdb"
+        url: "ws://localhost:17711/orderdb"
         onErrorStringChanged: {
             console.error("readerClient:", errorString)
         }

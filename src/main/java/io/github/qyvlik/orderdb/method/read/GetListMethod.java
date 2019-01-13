@@ -49,8 +49,8 @@ public class GetListMethod extends RpcMethod {
             return responseObject;
         }
 
-        int limit = 1000;
-        if (to - from > 1000) {
+        int limit = 100;
+        if (to - from > limit) {
             responseObject.setError(new ResponseError(400, "(to - from) must less than " + limit));
             return responseObject;
         }
