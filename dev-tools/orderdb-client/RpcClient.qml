@@ -15,9 +15,9 @@ WebSocket {
             params: params
         }
 
-        callback = callback || function(res) {
-            console.log(JSON.stringify(res));
-        };
+//        callback = callback || function(res) {
+//            console.log(JSON.stringify(res));
+//        };
 
         rpcCallback[id] = callback;
 
@@ -50,7 +50,7 @@ WebSocket {
             if (typeof channelCB !== 'undefined') {
                 channelCB(obj);
             } else {
-                console.error("have not channel:" + obj.channel + " callback")
+                // console.error("have not channel:" + obj.channel + " callback")
             }
 
         }
@@ -63,7 +63,7 @@ WebSocket {
 //                rpcCallback[obj.id] = undefined;
 
             } else {
-                console.error("have not id:" + obj.id + " callback, method: "  + obj.method)
+                // console.error("have not id:" + obj.id + " callback, method: "  + obj.method)
             }
         }
     }

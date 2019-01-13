@@ -35,7 +35,7 @@ public class GetLatestSequence extends RpcMethod {
         ResponseObject<Long> responseObject = new ResponseObject<Long>();
 
         try {
-            long index = queueUpService.getLastIndexByGroup(group);
+            Long index = queueUpService.getLastIndexByGroup(group);
             responseObject.setResult(index);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());

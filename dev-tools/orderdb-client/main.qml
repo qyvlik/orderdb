@@ -159,15 +159,14 @@ ApplicationWindow {
 
     Timer {
         id: timer
-        property int  currentId: 1
         interval: 50
         running: false
         repeat: true
         onTriggered: {
             var size = 1000;
-            console.time("batchSeq")
+            console.time("batchSeq");
+            var currentId = (new Date()).getTime() * 10000;
             batchSeq(currentId, size);
-            currentId += size;
             console.timeEnd("batchSeq")
         }
     }
@@ -180,8 +179,7 @@ ApplicationWindow {
                                 id: currentId+count,
                                 price: "1000.0",
                                 amount: "1.0"
-                            }, function(){}
-                            );
+                            });
         }
     }
 
@@ -220,14 +218,28 @@ ApplicationWindow {
         readerClient.subChannel("sub.append", params, subscribe, callback);
     }
 
+    function orderDBSysState(group, callback) {
+        var params =  [group];
+        writeClient.callRpcMethod("sys.state", params, callback)
+    }
+
     RpcClient {
         id: writeClient
-        url: "ws://localhost:17711/orderdb"
+        url : "ws://120.79.231.205:17711/orderdb"
+//        url: "ws://localhost:17711/orderdb"
+
+        onErrorStringChanged: {
+            console.error("writeClient:", errorString)
+        }
     }
 
     RpcClient {
         id: readerClient
-        url: "ws://localhost:17711/orderdb"
+        url : "ws://120.79.231.205:17711/orderdb"
+//        url: "ws://localhost:17711/orderdb"
+        onErrorStringChanged: {
+            console.error("readerClient:", errorString)
+        }
     }
 
 }
