@@ -13,8 +13,6 @@ docekr run -d \
 qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 ```
 
-##
-
 ## append
 
 ```json
@@ -34,6 +32,88 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
   "id": 10001,
   "method": "append",
   "result": 1
+}
+```
+
+- `result`: the index of the `key`
+
+
+## delete.by.index
+
+```json
+{
+  "id": 10001,
+  "method": "delete.by.index",
+  "params":["test", 1000]
+}
+```
+
+- `group`: group of your data
+- `index`: index of data
+
+```json
+{
+  "id": 10001,
+  "method": "append",
+  "result": "success"
+}
+```
+
+- `result`: success or failure
+
+## delete.by.key
+
+```json
+{
+  "id": 10001,
+  "method": "delete.by.key",
+  "params":["test", "action-1000"]
+}
+```
+
+- `group`: group of your data
+- `key`: key of data
+
+```json
+{
+  "id": 10001,
+  "method": "append",
+  "result": "success"
+}
+```
+
+- `result`: success or failure
+
+## append.list
+
+```json
+{
+  "id": 10001,
+  "method": "append.list",
+  "params":["test", true, [{"group":"test", "key":"key1"},{"group":"test", "key":"key2"}]]
+}
+```
+
+- `group`: group of your data
+- `ignoreExist`: ignore if the key is exist, or throw a exception
+- `list`: data of list
+
+```json
+{
+  "id": 10001,
+  "method": "append",
+  "result": [
+    {
+      "group": "test",
+      "key": "key1",
+      "index": 1
+    },
+    {
+      "group": "test",
+      "key": "key2",
+      "index": 2
+    }
+  ]
 }
 ```
 

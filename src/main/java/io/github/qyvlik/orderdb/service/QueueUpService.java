@@ -1,6 +1,9 @@
 package io.github.qyvlik.orderdb.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
+import io.github.qyvlik.orderdb.entity.AppendListRequest;
+import io.github.qyvlik.orderdb.entity.AppendRequest;
 import io.github.qyvlik.orderdb.entity.QueueUpBinlog;
 import io.github.qyvlik.orderdb.entity.QueueUpRecord;
 import org.iq80.leveldb.DB;
@@ -8,6 +11,8 @@ import org.iq80.leveldb.WriteBatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
@@ -149,6 +154,92 @@ public class QueueUpService {
     public Long getLastIndexByGroup(String group) {
         DB levelDB = orderDBFactory.createDBByGroup(group, false);
         return getLastIndexByGroup(levelDB, group);
+    }
+
+    public List<QueueUpRecord> appendList(AppendListRequest request) {
+        if (request.getList() == null || request.getList().size() == 0) {
+            throw new RuntimeException("appendList failure : list is empty");
+        }
+        DB levelDB = orderDBFactory.createDBByGroup(request.getGroup(), true);
+
+        WriteBatch writeBatch = levelDB.createWriteBatch();
+
+        // record
+        Long lastIndex = getLastIndexByGroup(levelDB, request.getGroup());
+        if (lastIndex == null) {
+            lastIndex = -1L;
+        }
+        long currentIndex = lastIndex;
+
+        // binlog
+        Long lastIndexOfBinlog = getBinlogLastIndexByGroup(levelDB, request.getGroup());
+        if (lastIndexOfBinlog == null) {
+            lastIndexOfBinlog = -1L;
+        }
+        Long currentIndexOfBinlog = lastIndexOfBinlog;
+
+        List<QueueUpRecord> recordList = Lists.newLinkedList();
+
+        for (AppendRequest appendRequest : request.getList()) {
+            QueueUpRecord record = getByGroupAndKey(levelDB, appendRequest.getGroup(), appendRequest.getKey());
+
+            if (record != null && request.getIgnoreExist()) {
+                recordList.add(record);
+                continue;
+            }
+
+            if (record != null && !request.getIgnoreExist()) {
+                throw new RuntimeException("appendList failure : group:"
+                        + appendRequest.getGroup()
+                        + ", key:" + appendRequest.getKey()
+                        + " already append");
+            }
+
+            // record
+            currentIndex += 1;
+
+            record = new QueueUpRecord(appendRequest.getGroup(),
+                    appendRequest.getKey(),
+                    currentIndex,
+                    appendRequest.getData());
+
+            // put group:index value
+            String key_name_of_group_and_index = keyNameOfGroupAndIndex(appendRequest.getGroup(), currentIndex);
+            writeBatch.put(bytes(key_name_of_group_and_index), bytes(JSON.toJSONString(record)));
+
+            // put the group:key index
+            String key_name_of_group_and_key = keyNameOfGroupAndKey(appendRequest.getGroup(), appendRequest.getKey());
+            writeBatch.put(bytes(key_name_of_group_and_key), bytes(currentIndex + ""));
+
+            recordList.add(record);
+
+            // binlog
+            currentIndexOfBinlog += 1;
+
+            QueueUpBinlog queueUpBinlog = new QueueUpBinlog(
+                    currentIndexOfBinlog,
+                    QueueUpBinlog.Action.append,
+                    record.getGroup(),
+                    record.getKey(),
+                    record.getData()
+            );
+
+            // put binlog
+            String key_name_of_binlog = keyNameOfBinlog(appendRequest.getGroup(), currentIndexOfBinlog);
+            writeBatch.put(bytes(key_name_of_binlog), bytes(JSON.toJSONString(queueUpBinlog)));
+        }
+
+        // put the group:lastIndex
+        String key_name_of_last_index = keyNameOfLastIndex(request.getGroup());
+        writeBatch.put(bytes(key_name_of_last_index), bytes(currentIndex + ""));
+
+        // put binlog_last_index
+        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(request.getGroup());
+        writeBatch.put(bytes(key_name_of_binlog_last_index), bytes(currentIndexOfBinlog + ""));
+
+        levelDB.write(writeBatch);
+
+        return recordList;
     }
 
     public QueueUpRecord append(String group, String key, Object data) {
