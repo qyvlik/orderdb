@@ -81,6 +81,9 @@ public class WebSocketSessionContainer {
     }
 
     public boolean safeSend(WebSocketSession session, WebSocketMessage webSocketMessage) {
+        if (!session.isOpen()) {
+            return false;
+        }
         try {
             sessionDecoratorMap.computeIfAbsent(
                     session.getId(),
