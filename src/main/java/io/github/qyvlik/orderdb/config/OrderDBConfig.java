@@ -1,7 +1,7 @@
 package io.github.qyvlik.orderdb.config;
 
-import io.github.qyvlik.orderdb.method.executor.WritableExecutor;
-import io.github.qyvlik.orderdb.service.OrderDBFactory;
+import io.github.qyvlik.orderdb.modules.executor.WritableExecutor;
+import io.github.qyvlik.orderdb.modules.durable.OrderDBFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

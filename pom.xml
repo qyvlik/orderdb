@@ -61,11 +61,11 @@
 			<version>3.3.2</version>
 		</dependency>
 
-		<!--<dependency>-->
-			<!--<groupId>io.github.qyvlik</groupId>-->
-			<!--<artifactId>jsonrpclite-io.github.qyvlik.jsonrpclite.core</artifactId>-->
-			<!--<version>1.0.0</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>io.github.qyvlik</groupId>
+			<artifactId>jsonrpclite-core</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 	</dependencies>
 
