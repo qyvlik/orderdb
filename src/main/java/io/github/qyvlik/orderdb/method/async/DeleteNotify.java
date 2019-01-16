@@ -47,6 +47,10 @@ public class DeleteNotify implements Runnable {
                 continue;
             }
 
+            if (!group.equals(record.getGroup())) {
+                continue;
+            }
+
             ChannelMessage<QueueUpRecord> message = new ChannelMessage<>();
             message.setChannel("sub.delete");
             message.setResult(record);

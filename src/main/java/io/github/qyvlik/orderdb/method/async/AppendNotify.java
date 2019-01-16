@@ -47,6 +47,10 @@ public class AppendNotify implements Runnable {
                 continue;
             }
 
+            if (!group.equals(record.getGroup())) {
+                continue;
+            }
+
             ChannelMessage<QueueUpRecord> message = new ChannelMessage<>();
             message.setChannel("sub.append");
             message.setResult(record);
