@@ -122,6 +122,7 @@ public class OrderDBFactory {
             throw new RuntimeException(e);
         }
 
+        // todo, if shutdown before sys put key-value, will lost the `group`
         if (!BLACK_GROUP_NAMES.contains(group)) {
             sysDB.put(bytes(GROUP_PREFIX + group), bytes(group));           // save group
         }

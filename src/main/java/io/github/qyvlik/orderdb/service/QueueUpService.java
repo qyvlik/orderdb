@@ -151,6 +151,16 @@ public class QueueUpService {
         return getByGroupAndIndex(levelDB, group, index);
     }
 
+    public QueueUpBinlog getBinlogByGroupAndIndex(String group, Long index) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, false);
+        return getBinlog(levelDB, group, index);
+    }
+
+    public Long getBinlogLastIndexByGroup(String group) {
+        DB levelDB = orderDBFactory.createDBByGroup(group, false);
+        return getBinlogLastIndexByGroup(levelDB, group);
+    }
+
     public Long getLastIndexByGroup(String group) {
         DB levelDB = orderDBFactory.createDBByGroup(group, false);
         return getLastIndexByGroup(levelDB, group);
