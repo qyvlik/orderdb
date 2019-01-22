@@ -1,36 +1,52 @@
 package io.github.qyvlik.orderdb.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.io.Serializable;
 
 public class QueueUpBinlog implements Serializable {
-    private Long index;
+    @JSONField(name = "bi")
+    private Long binlogIndex;
+
+    @JSONField(name = "a")
     private Action action;
+
+    @JSONField(name = "g")
     private String group;
+
+    @JSONField(name = "k")
     private String key;
+
+    @JSONField(name = "ki")
+    private Long keyIndex;
+
+    @JSONField(name = "d")
     private Object data;
 
     public QueueUpBinlog() {
 
     }
 
-    public QueueUpBinlog(Long index,
+    public QueueUpBinlog(Long binlogIndex,
                          Action action,
                          String group,
                          String key,
+                         Long keyIndex,
                          Object data) {
-        this.index = index;
+        this.binlogIndex = binlogIndex;
         this.action = action;
         this.group = group;
         this.key = key;
+        this.keyIndex = keyIndex;
         this.data = data;
     }
 
-    public Long getIndex() {
-        return index;
+    public Long getBinlogIndex() {
+        return binlogIndex;
     }
 
-    public void setIndex(Long index) {
-        this.index = index;
+    public void setBinlogIndex(Long binlogIndex) {
+        this.binlogIndex = binlogIndex;
     }
 
     public Action getAction() {
@@ -55,6 +71,14 @@ public class QueueUpBinlog implements Serializable {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Long getKeyIndex() {
+        return keyIndex;
+    }
+
+    public void setKeyIndex(Long keyIndex) {
+        this.keyIndex = keyIndex;
     }
 
     public Object getData() {

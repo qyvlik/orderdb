@@ -16,14 +16,14 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class GetLatestSequence extends RpcMethod {
+public class GetLatestSequenceMethod extends RpcMethod {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private QueueUpService queueUpService;
 
-    public GetLatestSequence() {
+    public GetLatestSequenceMethod() {
         super("orderdb", "get.latest.index", new RpcParams(
                 Lists.newArrayList(
                         new StringParam("group")

@@ -1,11 +1,20 @@
 package io.github.qyvlik.orderdb.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.io.Serializable;
 
 public class QueueUpRecord implements Serializable {
+    @JSONField(name = "g")
     private String group;
+
+    @JSONField(name = "k")
     private String key;
+
+    @JSONField(name = "ki")
     private Long index;
+
+    @JSONField(name = "d")
     private Object data;
 
     public QueueUpRecord() {

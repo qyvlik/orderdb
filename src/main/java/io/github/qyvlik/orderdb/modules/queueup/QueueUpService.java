@@ -2,10 +2,10 @@ package io.github.qyvlik.orderdb.modules.queueup;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import io.github.qyvlik.orderdb.entity.AppendListRequest;
-import io.github.qyvlik.orderdb.entity.AppendRequest;
 import io.github.qyvlik.orderdb.entity.QueueUpBinlog;
 import io.github.qyvlik.orderdb.entity.QueueUpRecord;
+import io.github.qyvlik.orderdb.entity.request.AppendListRequest;
+import io.github.qyvlik.orderdb.entity.request.AppendRequest;
 import io.github.qyvlik.orderdb.modules.durable.OrderDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
@@ -167,6 +167,10 @@ public class QueueUpService {
         return getLastIndexByGroup(levelDB, group);
     }
 
+    public void redoBinlog(List<QueueUpBinlog> binlogList) {
+
+    }
+
     public List<QueueUpRecord> appendList(AppendListRequest request) {
         if (request.getList() == null || request.getList().size() == 0) {
             throw new RuntimeException("appendList failure : list is empty");
@@ -232,6 +236,7 @@ public class QueueUpService {
                     QueueUpBinlog.Action.append,
                     record.getGroup(),
                     record.getKey(),
+                    record.getIndex(),
                     record.getData()
             );
 
@@ -297,6 +302,7 @@ public class QueueUpService {
                 QueueUpBinlog.Action.append,
                 group,
                 key,
+                currentIndex,
                 data
         );
 
@@ -354,6 +360,7 @@ public class QueueUpService {
                 QueueUpBinlog.Action.delete,
                 record.getGroup(),
                 record.getKey(),
+                null,
                 null
         );
 

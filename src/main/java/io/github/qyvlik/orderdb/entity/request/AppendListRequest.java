@@ -1,4 +1,4 @@
-package io.github.qyvlik.orderdb.entity;
+package io.github.qyvlik.orderdb.entity.request;
 
 import java.io.Serializable;
 import java.util.List;
