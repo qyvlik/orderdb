@@ -27,6 +27,7 @@ public class RpcClient {
     private WebSocketSession webSocketSession;
     private WebSocketConnectionManager webSocketConnectionManager;
     private String wsUrl;
+    // todo expired the object in map
     private Map<Long, RpcResponseFuture> rpcCallback = Maps.newConcurrentMap();
     private Map<String, ChannelMessageHandler> channelCallback = Maps.newConcurrentMap();
 
@@ -47,7 +48,7 @@ public class RpcClient {
 
     public void listenSub(String channel, Boolean subscribe, List params, ChannelMessageHandler handler) throws IOException {
         if (webSocketSession == null || !webSocketSession.isOpen()) {
-            throw new RuntimeException("callRpcAsync failure webSocketSession is not open");
+            throw new RuntimeException("callRpcAsyncInternal failure webSocketSession is not open");
         }
 
         if (subscribe != null && subscribe) {
@@ -64,9 +65,9 @@ public class RpcClient {
         webSocketSession.sendMessage(new TextMessage(JSON.toJSONString(subRequestObject)));
     }
 
-    public Future<ResponseObject> callRpcAsync(String method, List params, boolean returnFuture) throws Exception {
+    public Future<ResponseObject> callRpcAsync(String method, List params) throws Exception {
         if (webSocketSession == null || !webSocketSession.isOpen()) {
-            throw new RuntimeException("callRpcAsync failure webSocketSession is not open");
+            throw new RuntimeException("callRpcAsyncInternal failure webSocketSession is not open");
         }
 
         Long id = rpcRequestCounter.getAndIncrement();
@@ -74,12 +75,14 @@ public class RpcClient {
         requestObject.setId(id);
         requestObject.setMethod(method);
         requestObject.setParams(params);
-        return callRpcAsync(requestObject, returnFuture);
+        return callRpcAsyncInternal(requestObject, true);
     }
 
-    private Future<ResponseObject> callRpcAsync(RequestObject requestObject, boolean returnFuture) throws IOException {
+    private Future<ResponseObject> callRpcAsyncInternal(RequestObject requestObject,
+                                                        boolean returnFuture)
+            throws IOException {
         if (requestObject == null || requestObject.getId() == null) {
-            throw new RuntimeException("callRpcAsync failure requestObject is null or requestObject's id is null");
+            throw new RuntimeException("callRpcAsyncInternal failure requestObject is null or requestObject's id is null");
         }
 
         RpcResponseFuture rpcResponseFuture = null;
@@ -108,6 +111,8 @@ public class RpcClient {
                         = channelCallback.get(resObj.getString("channel"));
                 if (channelMessageHandler != null) {
                     ChannelMessage channelMessage = resObj.toJavaObject(ChannelMessage.class);
+
+                    // todo thread
                     channelMessageHandler.handle(channelMessage);
                 }
             } else {
