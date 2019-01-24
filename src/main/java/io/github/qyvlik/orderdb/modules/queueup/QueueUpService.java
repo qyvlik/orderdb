@@ -171,6 +171,7 @@ public class QueueUpService {
 
     }
 
+
     public List<QueueUpRecord> appendList(AppendListRequest request) {
         if (request.getList() == null || request.getList().size() == 0) {
             throw new RuntimeException("appendList failure : list is empty");
@@ -195,6 +196,7 @@ public class QueueUpService {
 
         List<QueueUpRecord> recordList = Lists.newLinkedList();
 
+        // todo check the request.getList() repeat
         for (AppendRequest appendRequest : request.getList()) {
             QueueUpRecord record = getByGroupAndKey(levelDB, appendRequest.getGroup(), appendRequest.getKey());
 

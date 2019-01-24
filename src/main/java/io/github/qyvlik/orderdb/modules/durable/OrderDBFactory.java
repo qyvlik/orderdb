@@ -63,6 +63,7 @@ public class OrderDBFactory {
         return dbMap;
     }
 
+    // todo check group
     public DB createDBByGroup(String group, boolean createIfMissing) {
         // not include `sys`
         if (getOrderDBDiskGroupLimit() < dbMap.size() - 1) {
@@ -115,16 +116,15 @@ public class OrderDBFactory {
             groupDirectory = directory + "/" + group;
         }
 
+        if (!BLACK_GROUP_NAMES.contains(group)) {
+            sysDB.put(bytes(GROUP_PREFIX + group), bytes(group));           // save group
+        }
+
         try {
             db = factory.open(new File(groupDirectory), options);
         } catch (Exception e) {
             logger.error("create leveldb failure:", e);
             throw new RuntimeException(e);
-        }
-
-        // todo, if shutdown before sys put key-value, will lost the `group`
-        if (!BLACK_GROUP_NAMES.contains(group)) {
-            sysDB.put(bytes(GROUP_PREFIX + group), bytes(group));           // save group
         }
 
         return db;
