@@ -25,15 +25,15 @@ public class GetBinlogMethod extends RpcMethod {
     public GetBinlogMethod() {
         super("orderdb", "get.binlog", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new LongParam("index")
                 )));
     }
 
-    public ResponseObject<QueueUpBinlog> getBinlog(String group, Long index) {
+    public ResponseObject<QueueUpBinlog> getBinlog(String scope, Long index) {
         ResponseObject<QueueUpBinlog> responseObject = new ResponseObject<>();
         try {
-            QueueUpBinlog binlog = queueUpService.getBinlogByGroupAndIndex(group, index);
+            QueueUpBinlog binlog = queueUpService.getBinlogByScopeAndIndex(scope, index);
             responseObject.setResult(binlog);
         } catch (Exception e) {
             responseObject.setError(new ResponseError(500, e.getMessage()));
@@ -45,9 +45,9 @@ public class GetBinlogMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Long index = Long.parseLong(params.get(1).toString());
 
-        return getBinlog(group, index);
+        return getBinlog(scope, index);
     }
 }

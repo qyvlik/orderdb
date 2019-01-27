@@ -12,8 +12,8 @@ public class WritableExecutor {
 
     private Map<String, Executor> executorMap = Maps.newConcurrentMap();
 
-    public Executor getByGroup(String group) {
-        return executorMap.computeIfAbsent(group, k -> new ThreadPoolExecutor(1, 1,
+    public Executor getByScope(String scope) {
+        return executorMap.computeIfAbsent(scope, k -> new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>()));
     }

@@ -26,19 +26,19 @@ public class SysStateMethod extends RpcMethod {
         super("orderdb",
                 "sys.state",
                 new RpcParams(Lists.newArrayList(
-                        new StringParam("group")
+                        new StringParam("scope")
                 ))
         );
     }
 
-    public ResponseObject<String> writePendingState(String group) {
+    public ResponseObject<String> writePendingState(String scope) {
         ResponseObject<String> responseObject = new ResponseObject<>();
 
-        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) writableExecutor.getByGroup(group);
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) writableExecutor.getByScope(scope);
 
         int pendingSize = threadPoolExecutor.getQueue().size();
 
-        responseObject.setResult("group: " + group + " have pending size:" + pendingSize);
+        responseObject.setResult("scope: " + scope + " have pending size:" + pendingSize);
 
         return responseObject;
     }
@@ -46,7 +46,7 @@ public class SysStateMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
-        return writePendingState(group);
+        String scope = params.get(0).toString();
+        return writePendingState(scope);
     }
 }

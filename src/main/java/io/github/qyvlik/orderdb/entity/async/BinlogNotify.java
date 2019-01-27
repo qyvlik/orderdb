@@ -41,12 +41,12 @@ public class BinlogNotify implements Runnable {
                 continue;
             }
 
-            String group = session.getSubRequestObject().getParams().get(0).toString();
-            if (StringUtils.isBlank(group)) {
+            String scope = session.getSubRequestObject().getParams().get(0).toString();
+            if (StringUtils.isBlank(scope)) {
                 continue;
             }
 
-            if (!group.equals(binlog.getGroup())) {
+            if (!scope.equals(binlog.getScope())) {
                 continue;
             }
 

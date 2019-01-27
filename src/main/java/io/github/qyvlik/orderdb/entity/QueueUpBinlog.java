@@ -11,8 +11,8 @@ public class QueueUpBinlog implements Serializable {
     @JSONField(name = "a")
     private Action action;
 
-    @JSONField(name = "g")
-    private String group;
+    @JSONField(name = "s")
+    private String scope;
 
     @JSONField(name = "k")
     private String key;
@@ -29,13 +29,13 @@ public class QueueUpBinlog implements Serializable {
 
     public QueueUpBinlog(Long binlogIndex,
                          Action action,
-                         String group,
+                         String scope,
                          String key,
                          Long keyIndex,
                          Object data) {
         this.binlogIndex = binlogIndex;
         this.action = action;
-        this.group = group;
+        this.scope = scope;
         this.key = key;
         this.keyIndex = keyIndex;
         this.data = data;
@@ -57,12 +57,12 @@ public class QueueUpBinlog implements Serializable {
         this.action = action;
     }
 
-    public String getGroup() {
-        return group;
+    public String getScope() {
+        return scope;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getKey() {

@@ -40,7 +40,7 @@ public class DeleteByIndexMethod extends RpcMethod {
 
     public DeleteByIndexMethod() {
         super("orderdb", "delete.by.index", new RpcParams(Lists.newArrayList(
-                new StringParam("group"),
+                new StringParam("scope"),
                 new LongParam("index")
         )));
     }
@@ -53,13 +53,13 @@ public class DeleteByIndexMethod extends RpcMethod {
             return null;
         }
 
-        return writableExecutor.getByGroup(requestObject.getParams().get(0).toString());
+        return writableExecutor.getByScope(requestObject.getParams().get(0).toString());
     }
 
-    public ResponseObject<String> deleteByIndex(String group, Long index) {
+    public ResponseObject<String> deleteByIndex(String scope, Long index) {
         ResponseObject<String> responseObject = new ResponseObject<String>();
         try {
-            QueueUpRecord record = queueUpService.delete(group, index);
+            QueueUpRecord record = queueUpService.delete(scope, index);
             responseObject.setResult(record != null ? "success" : "failure");
             if (record != null) {
                 recordPushExecutor.execute(new DeleteNotify(webSocketSessionContainer, record));
@@ -73,8 +73,8 @@ public class DeleteByIndexMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Long seq = Long.parseLong(params.get(1).toString());
-        return deleteByIndex(group, seq);
+        return deleteByIndex(scope, seq);
     }
 }

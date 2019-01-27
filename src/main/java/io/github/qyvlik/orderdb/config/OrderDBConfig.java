@@ -15,8 +15,8 @@ public class OrderDBConfig {
     @Value("${orderdb.disk.directory}")
     private String orderDBDiskDirectory;
 
-    @Value("${orderdb.disk.groupLimit}")
-    private Long orderDBDiskGroupLimit;
+    @Value("${orderdb.disk.scopeLimit}")
+    private Long orderDBDiskScopeLimit;
 
     @Value("${orderdb.admin.password}")
     private String orderDBAdminPassword;
@@ -34,7 +34,7 @@ public class OrderDBConfig {
     @Bean("orderDBFactory")
     public OrderDBFactory orderDBFactory() {
         return new OrderDBFactory(orderDBDiskDirectory,
-                orderDBDiskGroupLimit,
+                orderDBDiskScopeLimit,
                 orderDBAdminPassword);
     }
 }

@@ -5,7 +5,7 @@ orderdb:
     read: 64
   disk:
     directory: orderdb
-    groupLimit: 8
+    scopeLimit: 8
   admin:
     checkPassword: false
     password: orderdb2018

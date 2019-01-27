@@ -32,40 +32,40 @@ public class QueueUpService {
     @Qualifier("orderDBFactory")
     private OrderDBFactory orderDBFactory;
 
-    private String keyNameOfGroupAndKey(String group, String key) {
+    private String keyNameOfScopeAndKey(String scope, String key) {
         return QUEUE_UP_KEY + SEPARATOR + key;
     }
 
-    private String keyNameOfGroupAndIndex(String group, Long index) {
+    private String keyNameOfScopeAndIndex(String scope, Long index) {
         return QUEUE_UP_INDEX + SEPARATOR + index;
     }
 
-    private String keyNameOfLastIndex(String group) {
+    private String keyNameOfLastIndex(String scope) {
         return QUEUE_UP_LAST_INDEX;
     }
 
-    private String keyNameOfBinlog(String group, Long binlogIndex) {
-        // GROUP:QUEUE_UP_BINLOG:i
+    private String keyNameOfBinlog(String scope, Long binlogIndex) {
+        // scope:QUEUE_UP_BINLOG:i
         return QUEUE_UP_BINLOG + SEPARATOR + binlogIndex;
     }
 
-    private String keyNameOfBinlogLastIndex(String group) {
-        // GROUP:QUEUE_UP_BINLOG_LAST_INDEX
+    private String keyNameOfBinlogLastIndex(String scope) {
+        // scope:QUEUE_UP_BINLOG_LAST_INDEX
         return QUEUE_UP_BINLOG_LAST_INDEX;
     }
 
-    private QueueUpRecord getByGroupAndKey(DB levelDB, String group, String key) {
+    private QueueUpRecord getByScopeAndKey(DB levelDB, String scope, String key) {
         if (levelDB == null) {
             return null;
         }
-        String fullKey = keyNameOfGroupAndKey(group, key);
+        String fullKey = keyNameOfScopeAndKey(scope, key);
 
         try {
             byte[] valInDB = levelDB.get(bytes(fullKey));
 
             if (valInDB != null) {
                 Long indexOfRecord = Long.parseLong(asString(valInDB));
-                return getByGroupAndIndex(levelDB, group, indexOfRecord);
+                return getByScopeAndIndex(levelDB, scope, indexOfRecord);
             }
             return null;
         } catch (Exception e) {
@@ -73,12 +73,12 @@ public class QueueUpService {
         }
     }
 
-    private QueueUpRecord getByGroupAndIndex(DB levelDB, String group, Long index) {
+    private QueueUpRecord getByScopeAndIndex(DB levelDB, String scope, Long index) {
         if (levelDB == null) {
             return null;
         }
 
-        String fullKey = keyNameOfGroupAndIndex(group, index);
+        String fullKey = keyNameOfScopeAndIndex(scope, index);
 
         try {
             byte[] valInDB = levelDB.get(bytes(fullKey));
@@ -92,12 +92,12 @@ public class QueueUpService {
         }
     }
 
-    private Long getLastIndexByGroup(DB levelDB, String group) {
+    private Long getLastIndexByScope(DB levelDB, String scope) {
         if (levelDB == null) {
             return null;
         }
 
-        String fullKey = keyNameOfLastIndex(group);
+        String fullKey = keyNameOfLastIndex(scope);
         try {
             byte[] valInDB = levelDB.get(bytes(fullKey));
             if (valInDB != null) {
@@ -109,12 +109,12 @@ public class QueueUpService {
         }
     }
 
-    private Long getBinlogLastIndexByGroup(DB levelDB, String group) {
+    private Long getBinlogLastIndexByScope(DB levelDB, String scope) {
         if (levelDB == null) {
             return null;
         }
 
-        String fullKey = keyNameOfBinlogLastIndex(group);
+        String fullKey = keyNameOfBinlogLastIndex(scope);
         try {
             byte[] valInDB = levelDB.get(bytes(fullKey));
             if (valInDB != null) {
@@ -126,11 +126,11 @@ public class QueueUpService {
         }
     }
 
-    private QueueUpBinlog getBinlog(DB levelDB, String group, Long binlogIndex) {
+    private QueueUpBinlog getBinlog(DB levelDB, String scope, Long binlogIndex) {
         if (levelDB == null) {
             return null;
         }
-        String fullKey = keyNameOfBinlog(group, binlogIndex);
+        String fullKey = keyNameOfBinlog(scope, binlogIndex);
         try {
             byte[] valInDB = levelDB.get(bytes(fullKey));
             if (valInDB != null) {
@@ -142,29 +142,29 @@ public class QueueUpService {
         }
     }
 
-    public QueueUpRecord getByGroupAndKey(String group, String key) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, false);
-        return getByGroupAndKey(levelDB, group, key);
+    public QueueUpRecord getByScopeAndKey(String scope, String key) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, false);
+        return getByScopeAndKey(levelDB, scope, key);
     }
 
-    public QueueUpRecord getByGroupAndIndex(String group, Long index) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, false);
-        return getByGroupAndIndex(levelDB, group, index);
+    public QueueUpRecord getByScopeAndIndex(String scope, Long index) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, false);
+        return getByScopeAndIndex(levelDB, scope, index);
     }
 
-    public QueueUpBinlog getBinlogByGroupAndIndex(String group, Long index) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, false);
-        return getBinlog(levelDB, group, index);
+    public QueueUpBinlog getBinlogByScopeAndIndex(String scope, Long index) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, false);
+        return getBinlog(levelDB, scope, index);
     }
 
-    public Long getBinlogLastIndexByGroup(String group) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, false);
-        return getBinlogLastIndexByGroup(levelDB, group);
+    public Long getBinlogLastIndexByScope(String scope) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, false);
+        return getBinlogLastIndexByScope(levelDB, scope);
     }
 
-    public Long getLastIndexByGroup(String group) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, false);
-        return getLastIndexByGroup(levelDB, group);
+    public Long getLastIndexByScope(String scope) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, false);
+        return getLastIndexByScope(levelDB, scope);
     }
 
     public void redoBinlog(List<QueueUpBinlog> binlogList) {
@@ -176,19 +176,19 @@ public class QueueUpService {
         if (request.getList() == null || request.getList().size() == 0) {
             throw new RuntimeException("appendList failure : list is empty");
         }
-        DB levelDB = orderDBFactory.createDBByGroup(request.getGroup(), true);
+        DB levelDB = orderDBFactory.createDBByScope(request.getScope(), true);
 
         WriteBatch writeBatch = levelDB.createWriteBatch();
 
         // record
-        Long lastIndex = getLastIndexByGroup(levelDB, request.getGroup());
+        Long lastIndex = getLastIndexByScope(levelDB, request.getScope());
         if (lastIndex == null) {
             lastIndex = -1L;
         }
         long currentIndex = lastIndex;
 
         // binlog
-        Long lastIndexOfBinlog = getBinlogLastIndexByGroup(levelDB, request.getGroup());
+        Long lastIndexOfBinlog = getBinlogLastIndexByScope(levelDB, request.getScope());
         if (lastIndexOfBinlog == null) {
             lastIndexOfBinlog = -1L;
         }
@@ -198,7 +198,7 @@ public class QueueUpService {
 
         // todo check the request.getList() repeat
         for (AppendRequest appendRequest : request.getList()) {
-            QueueUpRecord record = getByGroupAndKey(levelDB, appendRequest.getGroup(), appendRequest.getKey());
+            QueueUpRecord record = getByScopeAndKey(levelDB, appendRequest.getScope(), appendRequest.getKey());
 
             if (record != null && request.getIgnoreExist()) {
                 recordList.add(record);
@@ -206,8 +206,8 @@ public class QueueUpService {
             }
 
             if (record != null && !request.getIgnoreExist()) {
-                throw new RuntimeException("appendList failure : group:"
-                        + appendRequest.getGroup()
+                throw new RuntimeException("appendList failure : scope:"
+                        + appendRequest.getScope()
                         + ", key:" + appendRequest.getKey()
                         + " already append");
             }
@@ -215,18 +215,18 @@ public class QueueUpService {
             // record
             currentIndex += 1;
 
-            record = new QueueUpRecord(appendRequest.getGroup(),
+            record = new QueueUpRecord(appendRequest.getScope(),
                     appendRequest.getKey(),
                     currentIndex,
                     appendRequest.getData());
 
-            // put group:index value
-            String key_name_of_group_and_index = keyNameOfGroupAndIndex(appendRequest.getGroup(), currentIndex);
-            writeBatch.put(bytes(key_name_of_group_and_index), bytes(JSON.toJSONString(record)));
+            // put scope:index value
+            String key_name_of_scope_and_index = keyNameOfScopeAndIndex(appendRequest.getScope(), currentIndex);
+            writeBatch.put(bytes(key_name_of_scope_and_index), bytes(JSON.toJSONString(record)));
 
-            // put the group:key index
-            String key_name_of_group_and_key = keyNameOfGroupAndKey(appendRequest.getGroup(), appendRequest.getKey());
-            writeBatch.put(bytes(key_name_of_group_and_key), bytes(currentIndex + ""));
+            // put the scope:key index
+            String key_name_of_scope_and_key = keyNameOfScopeAndKey(appendRequest.getScope(), appendRequest.getKey());
+            writeBatch.put(bytes(key_name_of_scope_and_key), bytes(currentIndex + ""));
 
             recordList.add(record);
 
@@ -236,23 +236,23 @@ public class QueueUpService {
             QueueUpBinlog queueUpBinlog = new QueueUpBinlog(
                     currentIndexOfBinlog,
                     QueueUpBinlog.Action.append,
-                    record.getGroup(),
+                    record.getScope(),
                     record.getKey(),
                     record.getIndex(),
                     record.getData()
             );
 
             // put binlog
-            String key_name_of_binlog = keyNameOfBinlog(appendRequest.getGroup(), currentIndexOfBinlog);
+            String key_name_of_binlog = keyNameOfBinlog(appendRequest.getScope(), currentIndexOfBinlog);
             writeBatch.put(bytes(key_name_of_binlog), bytes(JSON.toJSONString(queueUpBinlog)));
         }
 
-        // put the group:lastIndex
-        String key_name_of_last_index = keyNameOfLastIndex(request.getGroup());
+        // put the scope:lastIndex
+        String key_name_of_last_index = keyNameOfLastIndex(request.getScope());
         writeBatch.put(bytes(key_name_of_last_index), bytes(currentIndex + ""));
 
         // put binlog_last_index
-        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(request.getGroup());
+        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(request.getScope());
         writeBatch.put(bytes(key_name_of_binlog_last_index), bytes(currentIndexOfBinlog + ""));
 
         levelDB.write(writeBatch);
@@ -260,15 +260,15 @@ public class QueueUpService {
         return recordList;
     }
 
-    public QueueUpRecord append(String group, String key, Object data) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, true);
+    public QueueUpRecord append(String scope, String key, Object data) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, true);
 
-        QueueUpRecord record = getByGroupAndKey(levelDB, group, key);
+        QueueUpRecord record = getByScopeAndKey(levelDB, scope, key);
         if (record != null) {
             return record;
         }
 
-        Long lastIndex = getLastIndexByGroup(levelDB, group);
+        Long lastIndex = getLastIndexByScope(levelDB, scope);
 
         if (lastIndex == null) {
             lastIndex = -1L;
@@ -276,24 +276,24 @@ public class QueueUpService {
 
         long currentIndex = lastIndex + 1;
 
-        record = new QueueUpRecord(group, key, currentIndex, data);
+        record = new QueueUpRecord(scope, key, currentIndex, data);
 
         WriteBatch writeBatch = levelDB.createWriteBatch();
 
-        // put group:index value
-        String key_name_of_group_and_index = keyNameOfGroupAndIndex(group, currentIndex);
-        writeBatch.put(bytes(key_name_of_group_and_index), bytes(JSON.toJSONString(record)));
+        // put scope:index value
+        String key_name_of_scope_and_index = keyNameOfScopeAndIndex(scope, currentIndex);
+        writeBatch.put(bytes(key_name_of_scope_and_index), bytes(JSON.toJSONString(record)));
 
-        // put the group:key index
-        String key_name_of_group_and_key = keyNameOfGroupAndKey(group, key);
-        writeBatch.put(bytes(key_name_of_group_and_key), bytes(currentIndex + ""));
+        // put the scope:key index
+        String key_name_of_scope_and_key = keyNameOfScopeAndKey(scope, key);
+        writeBatch.put(bytes(key_name_of_scope_and_key), bytes(currentIndex + ""));
 
-        // put the group:lastIndex
-        String key_name_of_last_index = keyNameOfLastIndex(group);
+        // put the scope:lastIndex
+        String key_name_of_last_index = keyNameOfLastIndex(scope);
         writeBatch.put(bytes(key_name_of_last_index), bytes(currentIndex + ""));
 
         // binlog
-        Long lastIndexOfBinlog = getBinlogLastIndexByGroup(levelDB, group);
+        Long lastIndexOfBinlog = getBinlogLastIndexByScope(levelDB, scope);
         if (lastIndexOfBinlog == null) {
             lastIndexOfBinlog = -1L;
         }
@@ -302,18 +302,18 @@ public class QueueUpService {
         QueueUpBinlog queueUpBinlog = new QueueUpBinlog(
                 currentIndexOfBinlog,
                 QueueUpBinlog.Action.append,
-                group,
+                scope,
                 key,
                 currentIndex,
                 data
         );
 
         // put binlog
-        String key_name_of_binlog = keyNameOfBinlog(group, currentIndexOfBinlog);
+        String key_name_of_binlog = keyNameOfBinlog(scope, currentIndexOfBinlog);
         writeBatch.put(bytes(key_name_of_binlog), bytes(JSON.toJSONString(queueUpBinlog)));
 
         // put binlog_last_index
-        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(group);
+        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(scope);
         writeBatch.put(bytes(key_name_of_binlog_last_index), bytes(currentIndexOfBinlog + ""));
 
         levelDB.write(writeBatch);
@@ -321,16 +321,16 @@ public class QueueUpService {
         return record;
     }
 
-    public QueueUpRecord delete(String group, String key) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, true);
-        QueueUpRecord record = getByGroupAndKey(levelDB, group, key);
+    public QueueUpRecord delete(String scope, String key) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, true);
+        QueueUpRecord record = getByScopeAndKey(levelDB, scope, key);
         delete(levelDB, record);
         return record;
     }
 
-    public QueueUpRecord delete(String group, Long index) {
-        DB levelDB = orderDBFactory.createDBByGroup(group, true);
-        QueueUpRecord record = getByGroupAndIndex(levelDB, group, index);
+    public QueueUpRecord delete(String scope, Long index) {
+        DB levelDB = orderDBFactory.createDBByScope(scope, true);
+        QueueUpRecord record = getByScopeAndIndex(levelDB, scope, index);
         delete(levelDB, record);
         return record;
     }
@@ -342,16 +342,16 @@ public class QueueUpService {
 
         WriteBatch writeBatch = levelDB.createWriteBatch();
 
-        // del group:key
-        String key_name_of_group_key = keyNameOfGroupAndKey(record.getGroup(), record.getKey());
-        writeBatch.delete(bytes(key_name_of_group_key));
+        // del scope:key
+        String key_name_of_scope_key = keyNameOfScopeAndKey(record.getScope(), record.getKey());
+        writeBatch.delete(bytes(key_name_of_scope_key));
 
-        // del group:index
-        String key_name_of_group_index = keyNameOfGroupAndIndex(record.getGroup(), record.getIndex());
-        writeBatch.delete(bytes(key_name_of_group_index));
+        // del scope:index
+        String key_name_of_scope_index = keyNameOfScopeAndIndex(record.getScope(), record.getIndex());
+        writeBatch.delete(bytes(key_name_of_scope_index));
 
         // binlog
-        Long lastIndexOfBinlog = getBinlogLastIndexByGroup(levelDB, record.getGroup());
+        Long lastIndexOfBinlog = getBinlogLastIndexByScope(levelDB, record.getScope());
         if (lastIndexOfBinlog == null) {
             lastIndexOfBinlog = -1L;
         }
@@ -360,18 +360,18 @@ public class QueueUpService {
         QueueUpBinlog queueUpBinlog = new QueueUpBinlog(
                 currentIndexOfBinlog,
                 QueueUpBinlog.Action.delete,
-                record.getGroup(),
+                record.getScope(),
                 record.getKey(),
                 null,
                 null
         );
 
         // put binlog
-        String key_name_of_binlog = keyNameOfBinlog(record.getGroup(), currentIndexOfBinlog);
+        String key_name_of_binlog = keyNameOfBinlog(record.getScope(), currentIndexOfBinlog);
         writeBatch.put(bytes(key_name_of_binlog), bytes(JSON.toJSONString(queueUpBinlog)));
 
         // put binlog_last_index
-        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(record.getGroup());
+        String key_name_of_binlog_last_index = keyNameOfBinlogLastIndex(record.getScope());
         writeBatch.put(bytes(key_name_of_binlog_last_index), bytes(currentIndexOfBinlog + ""));
 
         levelDB.write(writeBatch);

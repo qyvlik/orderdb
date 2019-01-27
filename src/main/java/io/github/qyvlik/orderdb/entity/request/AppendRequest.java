@@ -3,7 +3,7 @@ package io.github.qyvlik.orderdb.entity.request;
 import java.io.Serializable;
 
 public class AppendRequest implements Serializable {
-    private String group;
+    private String scope;
     private String key;
     private Object data;
 
@@ -11,12 +11,12 @@ public class AppendRequest implements Serializable {
 
     }
 
-    public String getGroup() {
-        return group;
+    public String getScope() {
+        return scope;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getKey() {

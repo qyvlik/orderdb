@@ -27,9 +27,9 @@ ApplicationWindow {
 
         TextField {
             Layout.fillWidth: true
-            id: groupInput
+            id: scopeInput
             text: "test"
-            placeholderText: "input group"
+            placeholderText: "input scope"
         }
 
         RowLayout {
@@ -44,7 +44,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.by.index"
                 onClicked: {
-                    orderDBGetByIndex(groupInput.text, indexInput.text, function(res){
+                    orderDBGetByIndex(scopeInput.text, indexInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -63,7 +63,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.by.key"
                 onClicked: {
-                    orderDBGetByKey(groupInput.text, keyInput.text, function(res){
+                    orderDBGetByKey(scopeInput.text, keyInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -89,7 +89,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 text: "get.list"
                 onClicked: {
-                    orderDBGetList(groupInput.text, fromInput.text, toInput.text, function(res){
+                    orderDBGetList(scopeInput.text, fromInput.text, toInput.text, function(res){
                         console.log("res:" + JSON.stringify(res))
                     });
                 }
@@ -103,7 +103,7 @@ ApplicationWindow {
             property bool subscribe: false
             onClicked: {
                 subscribeButton.subscribe = !subscribeButton.subscribe;
-                orderDBSubAppend(groupInput.text, subscribeButton.subscribe, function(res){
+                orderDBSubAppend(scopeInput.text, subscribeButton.subscribe, function(res){
                     if (res.error) {
                         console.error("orderDBSubAppend error:" + JSON.stringify(res));
                         return;
@@ -123,7 +123,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             text: "get latest index"
             onClicked: {
-                orderDBGetLatestIndex(groupInput.text, function(res){
+                orderDBGetLatestIndex(scopeInput.text, function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
@@ -133,7 +133,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             text: "sys.state"
             onClicked: {
-                orderDBSysState(groupInput.text, function(res){
+                orderDBSysState(scopeInput.text, function(res){
                     console.log("res:" + JSON.stringify(res))
                 });
             }
@@ -150,9 +150,9 @@ ApplicationWindow {
             text: "append.list"
             onClicked: {
                 var list = [
-                            {'group':'test', 'key': 'key1', 'data':{}},
-                            {'group':'test', 'key': 'key1', 'data':{}},
-                            {'group':'test', 'key': 'key2', 'data':{}}
+                            {'scope':'test', 'key': 'key1', 'data':{}},
+                            {'scope':'test', 'key': 'key1', 'data':{}},
+                            {'scope':'test', 'key': 'key2', 'data':{}}
                         ];
                 orderDBAppendList("test", true, list, function(res){
                     console.log("res:" + JSON.stringify(res))
@@ -183,7 +183,7 @@ ApplicationWindow {
 
     function batchSeq(currentId, count) {
         while(count -- > 0) {
-            orderDBAppend(groupInput.text,
+            orderDBAppend(scopeInput.text,
                             "submit-" + (currentId+count),
                             {
                                 id: currentId+count,
@@ -193,43 +193,43 @@ ApplicationWindow {
         }
     }
 
-    function orderDBGetList(group, from, to, callback) {
-        var params = [group, from, to, ];
+    function orderDBGetList(scope, from, to, callback) {
+        var params = [scope, from, to, ];
         readerClient.callRpcMethod("get.list", params, callback);
     }
 
-    function orderDBGetLatestIndex(group, callback) {
-        var params = [group];
+    function orderDBGetLatestIndex(scope, callback) {
+        var params = [scope];
         readerClient.callRpcMethod("get.latest.index", params, callback);
     }
 
-    function orderDBGetByKey(group, key, callback) {
-        var params = [group, key];
+    function orderDBGetByKey(scope, key, callback) {
+        var params = [scope, key];
         readerClient.callRpcMethod("get.by.key", params, callback);
     }
 
-    function orderDBGetByIndex(group, index, callback) {
-        var params = [group, index];
+    function orderDBGetByIndex(scope, index, callback) {
+        var params = [scope, index];
         readerClient.callRpcMethod("get.by.index", params, callback);
     }
 
-    function orderDBAppend(group, key, value, callback) {
-        var params =  [group, key, value];
+    function orderDBAppend(scope, key, value, callback) {
+        var params =  [scope, key, value];
         writeClient.callRpcMethod("append", params, callback)
     }
 
-    function orderDBSysState(group, callback) {
-        var params =  [group];
+    function orderDBSysState(scope, callback) {
+        var params =  [scope];
         writeClient.callRpcMethod("sys.state", params, callback)
     }
 
-    function orderDBAppendList(group, ignoreExist, list, callback) {
-        var params =  [group, ignoreExist, list];
+    function orderDBAppendList(scope, ignoreExist, list, callback) {
+        var params =  [scope, ignoreExist, list];
         writeClient.callRpcMethod("append.list", params, callback)
     }
 
-    function orderDBSubAppend(group, subscribe, callback) {
-        var params = [group];
+    function orderDBSubAppend(scope, subscribe, callback) {
+        var params = [scope];
         readerClient.subChannel("sub.append", params, subscribe, callback);
     }
 

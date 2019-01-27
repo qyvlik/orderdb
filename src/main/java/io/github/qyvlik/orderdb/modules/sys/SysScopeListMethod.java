@@ -13,19 +13,19 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.List;
 
 @Service
-public class SysGroupListMethod extends RpcMethod {
+public class SysScopeListMethod extends RpcMethod {
 
     @Autowired
     private OrderDBFactory orderDBFactory;
 
-    public SysGroupListMethod() {
+    public SysScopeListMethod() {
         super("orderdb",
-                "sys.group.list",
+                "sys.scope.list",
                 new RpcParams(Lists.newArrayList())
         );
     }
 
-    public ResponseObject<List<String>> sysGroupList() {
+    public ResponseObject<List<String>> sysScopeList() {
         ResponseObject<List<String>> responseObject = new ResponseObject<List<String>>();
 
         responseObject.setResult(Lists.newArrayList(orderDBFactory.getDbMap().keySet()));
@@ -35,6 +35,6 @@ public class SysGroupListMethod extends RpcMethod {
 
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
-        return sysGroupList();
+        return sysScopeList();
     }
 }

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class AppendListRequest implements Serializable {
-    private String group;
+    private String scope;
     private Boolean ignoreExist;
     private List<AppendRequest> list;
 
@@ -12,8 +12,8 @@ public class AppendListRequest implements Serializable {
 
     }
 
-    public AppendListRequest(String group, Boolean ignoreExist, List<AppendRequest> list) {
-        this.group = group;
+    public AppendListRequest(String scope, Boolean ignoreExist, List<AppendRequest> list) {
+        this.scope = scope;
         this.ignoreExist = ignoreExist;
         this.list = list;
     }
@@ -26,12 +26,12 @@ public class AppendListRequest implements Serializable {
         this.ignoreExist = ignoreExist;
     }
 
-    public String getGroup() {
-        return group;
+    public String getScope() {
+        return scope;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public List<AppendRequest> getList() {

@@ -25,14 +25,14 @@ public class GetBinlogListMethod extends RpcMethod {
     public GetBinlogListMethod() {
         super("orderdb", "get.binlog.list", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new LongParam("from"),
                         new LongParam("to")
                 )));
     }
 
 
-    public ResponseObject<List<QueueUpBinlog>> getBinlogList(String group, Long from, Long to) {
+    public ResponseObject<List<QueueUpBinlog>> getBinlogList(String scope, Long from, Long to) {
         ResponseObject<List<QueueUpBinlog>> responseObject = new ResponseObject<>();
         if (from == null || from < 0) {
             responseObject.setError(new ResponseError(400, "from must bigger than zero"));
@@ -59,7 +59,7 @@ public class GetBinlogListMethod extends RpcMethod {
         List<QueueUpBinlog> list = Lists.newLinkedList();
 
         do {
-            QueueUpBinlog record = queueUpService.getBinlogByGroupAndIndex(group, seek);
+            QueueUpBinlog record = queueUpService.getBinlogByScopeAndIndex(scope, seek);
             if (record != null) {
                 list.add(record);
             }
@@ -73,9 +73,9 @@ public class GetBinlogListMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Long from = Long.parseLong(params.get(1).toString());
         Long to = Long.parseLong(params.get(2).toString());
-        return getBinlogList(group, from, to);
+        return getBinlogList(scope, from, to);
     }
 }

@@ -27,15 +27,15 @@ public class GetByKeyMethod extends RpcMethod {
     public GetByKeyMethod() {
         super("orderdb", "get.by.key", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new StringParam("key")
                 )));
     }
 
-    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String group, String key) {
+    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String scope, String key) {
         ResponseObject<QueueUpRecord> responseObject = new ResponseObject<>();
         try {
-            QueueUpRecord record = queueUpService.getByGroupAndKey(group, key);
+            QueueUpRecord record = queueUpService.getByScopeAndKey(scope, key);
             responseObject.setResult(record);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
@@ -47,8 +47,8 @@ public class GetByKeyMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         String key = params.get(1).toString();
-        return getValueByUniqueKey(group, key);
+        return getValueByUniqueKey(scope, key);
     }
 }

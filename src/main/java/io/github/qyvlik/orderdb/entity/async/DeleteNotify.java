@@ -42,12 +42,12 @@ public class DeleteNotify implements Runnable {
                 continue;
             }
 
-            String group = session.getSubRequestObject().getParams().get(0).toString();
-            if (StringUtils.isBlank(group)) {
+            String scope = session.getSubRequestObject().getParams().get(0).toString();
+            if (StringUtils.isBlank(scope)) {
                 continue;
             }
 
-            if (!group.equals(record.getGroup())) {
+            if (!scope.equals(record.getScope())) {
                 continue;
             }
 

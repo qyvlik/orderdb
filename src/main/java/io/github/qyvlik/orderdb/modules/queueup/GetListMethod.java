@@ -24,13 +24,13 @@ public class GetListMethod extends RpcMethod {
     public GetListMethod() {
         super("orderdb", "get.list", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new LongParam("from"),
                         new LongParam("to")
                 )));
     }
 
-    private ResponseObject<List<QueueUpRecord>> getList(String group, Long from, Long to) {
+    private ResponseObject<List<QueueUpRecord>> getList(String scope, Long from, Long to) {
         ResponseObject<List<QueueUpRecord>> responseObject = new ResponseObject<>();
 
         if (from == null || from < 0) {
@@ -59,7 +59,7 @@ public class GetListMethod extends RpcMethod {
         List<QueueUpRecord> list = Lists.newLinkedList();
 
         do {
-            QueueUpRecord record = queueUpService.getByGroupAndIndex(group, seek);
+            QueueUpRecord record = queueUpService.getByScopeAndIndex(scope, seek);
             if (record != null) {
                 list.add(record);
             }
@@ -73,9 +73,9 @@ public class GetListMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Long from = Long.parseLong(params.get(1).toString());
         Long to = Long.parseLong(params.get(2).toString());
-        return getList(group, from, to);
+        return getList(scope, from, to);
     }
 }

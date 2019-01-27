@@ -45,17 +45,17 @@ public class AppendMethod extends RpcMethod {
     public AppendMethod() {
         super("orderdb", "append", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new StringParam("key"),
                         new JSONObjectParam("data")
                 )));
     }
 
-    public ResponseObject<Long> orderDBAppend(String group, String key, Object data) {
+    public ResponseObject<Long> orderDBAppend(String scope, String key, Object data) {
         ResponseObject<Long> responseObject = new ResponseObject<>();
 
         try {
-            QueueUpRecord record = queueUpService.append(group, key, data);
+            QueueUpRecord record = queueUpService.append(scope, key, data);
 
             if (record != null) {
                 responseObject.setResult(record.getIndex());
@@ -64,8 +64,8 @@ public class AppendMethod extends RpcMethod {
                 responseObject.setError(new ResponseError(500, "sequence failure"));
             }
         } catch (Exception e) {
-            logger.error("method:{}, group:{}, key:{}, object:{}, error:{}",
-                    getMethod(), group, key, data, e.getMessage());
+            logger.error("method:{}, scope:{}, key:{}, object:{}, error:{}",
+                    getMethod(), scope, key, data, e.getMessage());
             responseObject.setError(new ResponseError(500, e.getMessage()));
         }
 
@@ -80,7 +80,7 @@ public class AppendMethod extends RpcMethod {
             return null;
         }
 
-        return writableExecutor.getByGroup(requestObject.getParams().get(0).toString());
+        return writableExecutor.getByScope(requestObject.getParams().get(0).toString());
     }
 
     @Override
@@ -88,10 +88,10 @@ public class AppendMethod extends RpcMethod {
 
         List params = requestObject.getParams();
 
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         String key = params.get(1).toString();
         JSONObject data = (JSONObject) params.get(2);
 
-        return orderDBAppend(group, key, data);
+        return orderDBAppend(scope, key, data);
     }
 }

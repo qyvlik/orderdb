@@ -24,14 +24,14 @@ public class GetBinlogLastIndexMethod extends RpcMethod {
     public GetBinlogLastIndexMethod() {
         super("orderdb", "get.binlog.lastIndex", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group")
+                        new StringParam("scope")
                 )));
     }
 
-    public ResponseObject<Long> getBinlogLastIndex(String group) {
+    public ResponseObject<Long> getBinlogLastIndex(String scope) {
         ResponseObject<Long> responseObject = new ResponseObject<>();
         try {
-            Long lastIndex = queueUpService.getBinlogLastIndexByGroup(group);
+            Long lastIndex = queueUpService.getBinlogLastIndexByScope(scope);
             responseObject.setResult(lastIndex);
         } catch (Exception e) {
             responseObject.setError(new ResponseError(500, e.getMessage()));
@@ -42,7 +42,7 @@ public class GetBinlogLastIndexMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
-        return getBinlogLastIndex(group);
+        String scope = params.get(0).toString();
+        return getBinlogLastIndex(scope);
     }
 }

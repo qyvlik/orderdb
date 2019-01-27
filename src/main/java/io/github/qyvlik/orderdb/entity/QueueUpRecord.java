@@ -5,8 +5,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import java.io.Serializable;
 
 public class QueueUpRecord implements Serializable {
-    @JSONField(name = "g")
-    private String group;
+    @JSONField(name = "s")
+    private String scope;
 
     @JSONField(name = "k")
     private String key;
@@ -21,19 +21,19 @@ public class QueueUpRecord implements Serializable {
 
     }
 
-    public QueueUpRecord(String group, String key, Long index, Object data) {
-        this.group = group;
+    public QueueUpRecord(String scope, String key, Long index, Object data) {
+        this.scope = scope;
         this.key = key;
         this.index = index;
         this.data = data;
     }
 
-    public String getGroup() {
-        return group;
+    public String getScope() {
+        return scope;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getKey() {
@@ -63,7 +63,7 @@ public class QueueUpRecord implements Serializable {
     @Override
     public String toString() {
         return "QueueUpRecord{" +
-                "group='" + group + '\'' +
+                "scope='" + scope + '\'' +
                 ", key='" + key + '\'' +
                 ", index=" + index +
                 ", data=" + data +

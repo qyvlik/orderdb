@@ -26,15 +26,15 @@ public class GetLatestSequenceMethod extends RpcMethod {
     public GetLatestSequenceMethod() {
         super("orderdb", "get.latest.index", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group")
+                        new StringParam("scope")
                 )));
     }
 
-    public ResponseObject<Long> getLatestSequence(String group) {
+    public ResponseObject<Long> getLatestSequence(String scope) {
         ResponseObject<Long> responseObject = new ResponseObject<Long>();
 
         try {
-            Long index = queueUpService.getLastIndexByGroup(group);
+            Long index = queueUpService.getLastIndexByScope(scope);
             responseObject.setResult(index);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
@@ -46,7 +46,7 @@ public class GetLatestSequenceMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
-        return getLatestSequence(group);
+        String scope = params.get(0).toString();
+        return getLatestSequence(scope);
     }
 }

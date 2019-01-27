@@ -27,15 +27,15 @@ public class GetByIndexMethod extends RpcMethod {
     public GetByIndexMethod() {
         super("orderdb", "get.by.index", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new LongParam("index")
                 )));
     }
 
-    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String group, Long sequence) {
+    public ResponseObject<QueueUpRecord> getValueByUniqueKey(String scope, Long sequence) {
         ResponseObject<QueueUpRecord> responseObject = new ResponseObject<>();
         try {
-            QueueUpRecord record = queueUpService.getByGroupAndIndex(group, sequence);
+            QueueUpRecord record = queueUpService.getByScopeAndIndex(scope, sequence);
             responseObject.setResult(record);
         } catch (Exception e) {
             logger.error("{} failure:{}", getMethod(), e.getMessage());
@@ -47,8 +47,8 @@ public class GetByIndexMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Long sequence = Long.parseLong(params.get(1).toString());
-        return getValueByUniqueKey(group, sequence);
+        return getValueByUniqueKey(scope, sequence);
     }
 }

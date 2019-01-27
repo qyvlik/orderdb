@@ -40,7 +40,7 @@ public class DeleteByKeyMethod extends RpcMethod {
 
     public DeleteByKeyMethod() {
         super("orderdb", "delete.by.key", new RpcParams(Lists.newArrayList(
-                new StringParam("group"),
+                new StringParam("scope"),
                 new StringParam("key")
         )));
     }
@@ -53,13 +53,13 @@ public class DeleteByKeyMethod extends RpcMethod {
             return null;
         }
 
-        return writableExecutor.getByGroup(requestObject.getParams().get(0).toString());
+        return writableExecutor.getByScope(requestObject.getParams().get(0).toString());
     }
 
-    public ResponseObject<String> deleteByKey(String group, String key) {
+    public ResponseObject<String> deleteByKey(String scope, String key) {
         ResponseObject<String> responseObject = new ResponseObject<String>();
         try {
-            QueueUpRecord record = queueUpService.delete(group, key);
+            QueueUpRecord record = queueUpService.delete(scope, key);
             responseObject.setResult(record != null ? "success" : "failure");
             if (record != null) {
                 recordPushExecutor.execute(new DeleteNotify(webSocketSessionContainer, record));
@@ -73,8 +73,8 @@ public class DeleteByKeyMethod extends RpcMethod {
     @Override
     protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
         List params = requestObject.getParams();
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         String key = params.get(1).toString();
-        return deleteByKey(group, key);
+        return deleteByKey(scope, key);
     }
 }

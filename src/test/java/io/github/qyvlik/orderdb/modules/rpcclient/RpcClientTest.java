@@ -2,6 +2,8 @@ package io.github.qyvlik.orderdb.modules.rpcclient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.github.qyvlik.jsonrpclite.core.client.ChannelMessageHandler;
+import io.github.qyvlik.jsonrpclite.core.client.RpcClient;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonsub.pub.ChannelMessage;
 import org.junit.Test;

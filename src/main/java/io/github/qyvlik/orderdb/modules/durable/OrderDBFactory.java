@@ -21,10 +21,10 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 public class OrderDBFactory {
 
-    public static final Set<String> BLACK_GROUP_NAMES =
+    public static final Set<String> BLACK_SCOPE_NAMES =
             new TreeSet<String>(Lists.newArrayList("sys"));
 
-    public static final String GROUP_PREFIX = "group:";
+    public static final String SCOPE_PREFIX = "scope:";
     public static final String USER_PREFIX = "user:";
 
     private final Map<String, DB> dbMap = Maps.newConcurrentMap();
@@ -34,16 +34,16 @@ public class OrderDBFactory {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private String orderDBDiskDirectory;
-    private Long orderDBDiskGroupLimit;
+    private Long orderDBDiskScopeLimit;
     private String initPassword;
 
     public OrderDBFactory() {
 
     }
 
-    public OrderDBFactory(String orderDBDiskDirectory, Long orderDBDiskGroupLimit, String initPassword) {
+    public OrderDBFactory(String orderDBDiskDirectory, Long orderDBDiskScopeLimit, String initPassword) {
         this.orderDBDiskDirectory = orderDBDiskDirectory;
-        this.orderDBDiskGroupLimit = orderDBDiskGroupLimit;
+        this.orderDBDiskScopeLimit = orderDBDiskScopeLimit;
         this.initPassword = initPassword;
     }
 
@@ -51,8 +51,8 @@ public class OrderDBFactory {
         return orderDBDiskDirectory;
     }
 
-    public Long getOrderDBDiskGroupLimit() {
-        return orderDBDiskGroupLimit;
+    public Long getOrderDBDiskScopeLimit() {
+        return orderDBDiskScopeLimit;
     }
 
     public DB getSysDB() {
@@ -63,42 +63,42 @@ public class OrderDBFactory {
         return dbMap;
     }
 
-    // todo check group
-    public DB createDBByGroup(String group, boolean createIfMissing) {
+    // todo check scope
+    public DB createDBByScope(String scope, boolean createIfMissing) {
         // not include `sys`
-        if (getOrderDBDiskGroupLimit() < dbMap.size() - 1) {
-            throw new RuntimeException("createDBByGroup failure : group count more than "
-                    + orderDBDiskGroupLimit);
+        if (getOrderDBDiskScopeLimit() < dbMap.size() - 1) {
+            throw new RuntimeException("createDBByScope failure : scope count more than "
+                    + orderDBDiskScopeLimit);
         }
 
-        return createDBByGroup(group, createIfMissing, false);
+        return createDBByScope(scope, createIfMissing, false);
     }
 
-    protected DB createDBByGroup(String group, boolean createIfMissing, boolean ignoreBlackList) {
+    protected DB createDBByScope(String scope, boolean createIfMissing, boolean ignoreBlackList) {
         if (createIfMissing) {
-            return dbMap.computeIfAbsent(group, k -> createBucketInternal(group, ignoreBlackList));
+            return dbMap.computeIfAbsent(scope, k -> createBucketInternal(scope, ignoreBlackList));
         } else {
-            return dbMap.get(group);
+            return dbMap.get(scope);
         }
     }
 
-    private DB createBucketInternal(String group, boolean ignoreBlackList) {
-        if (StringUtils.isBlank(group)) {
-            throw new RuntimeException("createDBByGroup failure : group was empty");
+    private DB createBucketInternal(String scope, boolean ignoreBlackList) {
+        if (StringUtils.isBlank(scope)) {
+            throw new RuntimeException("createDBByScope failure : scope was empty");
         }
 
-        if (!ignoreBlackList && BLACK_GROUP_NAMES.contains(group)) {
-            throw new RuntimeException("createDBByGroup failure : group "
-                    + group + " is in blacklist");
+        if (!ignoreBlackList && BLACK_SCOPE_NAMES.contains(scope)) {
+            throw new RuntimeException("createDBByScope failure : scope "
+                    + scope + " is in blacklist");
         }
 
-        if (group.contains("/")) {
-            throw new RuntimeException("createDBByGroup failure : group "
-                    + group + " contains invalidate character");
+        if (scope.contains("/")) {
+            throw new RuntimeException("createDBByScope failure : scope "
+                    + scope + " contains invalidate character");
         }
 
         if (StringUtils.isBlank(getOrderDBDiskDirectory())) {
-            throw new RuntimeException("createDBByGroup failure : orderDBDiskDirectory was empty");
+            throw new RuntimeException("createDBByScope failure : orderDBDiskDirectory was empty");
         }
 
         DB db = null;
@@ -108,20 +108,20 @@ public class OrderDBFactory {
 
         String directory = getOrderDBDiskDirectory();
 
-        String groupDirectory;
+        String scopeDirectory;
 
         if (directory.endsWith("/")) {
-            groupDirectory = directory + group;
+            scopeDirectory = directory + scope;
         } else {
-            groupDirectory = directory + "/" + group;
+            scopeDirectory = directory + "/" + scope;
         }
 
-        if (!BLACK_GROUP_NAMES.contains(group)) {
-            sysDB.put(bytes(GROUP_PREFIX + group), bytes(group));           // save group
+        if (!BLACK_SCOPE_NAMES.contains(scope)) {
+            sysDB.put(bytes(SCOPE_PREFIX + scope), bytes(scope));           // save scope
         }
 
         try {
-            db = factory.open(new File(groupDirectory), options);
+            db = factory.open(new File(scopeDirectory), options);
         } catch (Exception e) {
             logger.error("create leveldb failure:", e);
             throw new RuntimeException(e);
@@ -176,7 +176,7 @@ public class OrderDBFactory {
 
     @PostConstruct
     public void loadDBs() throws Exception {
-        sysDB = createDBByGroup("sys", true, true);
+        sysDB = createDBByScope("sys", true, true);
 
         createAdminUser();      // init password
 
@@ -184,9 +184,9 @@ public class OrderDBFactory {
         try {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
-                if (key.startsWith(GROUP_PREFIX)) {
+                if (key.startsWith(SCOPE_PREFIX)) {
                     String value = asString(iterator.peekNext().getValue());
-                    createDBByGroup(value, true);
+                    createDBByScope(value, true);
                 }
             }
         } finally {
@@ -198,14 +198,14 @@ public class OrderDBFactory {
     @PreDestroy
     public void closeDBs() {
         logger.debug("closeDBs start");
-        for (String group : dbMap.keySet()) {
-            logger.info("closeDBs start:{}", group);
-            DB db = dbMap.get(group);
+        for (String scope : dbMap.keySet()) {
+            logger.info("closeDBs start:{}", scope);
+            DB db = dbMap.get(scope);
             try {
                 db.close();
-                logger.info("closeDBs end:{}", group);
+                logger.info("closeDBs end:{}", scope);
             } catch (Exception e) {
-                logger.error("closeDBs failure:{}", group, e);
+                logger.error("closeDBs failure:{}", scope, e);
             }
         }
         logger.debug("closeDBs end");

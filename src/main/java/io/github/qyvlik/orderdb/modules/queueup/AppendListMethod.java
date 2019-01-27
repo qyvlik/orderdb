@@ -49,28 +49,28 @@ public class AppendListMethod extends RpcMethod {
     public AppendListMethod() {
         super("orderdb", "append.list", new RpcParams(
                 Lists.newArrayList(
-                        new StringParam("group"),
+                        new StringParam("scope"),
                         new BooleanParam("ignoreExist"),
                         new ListParam("list")
                 )));
     }
 
-    public ResponseObject<List<SimpleAppendResult>> orderDBAppendList(String group, Boolean ignoreExist, JSONArray list) {
+    public ResponseObject<List<SimpleAppendResult>> orderDBAppendList(String scope, Boolean ignoreExist, JSONArray list) {
         List<AppendRequest> requestList = list.toJavaList(AppendRequest.class);
 
         ResponseObject<List<SimpleAppendResult>> responseObject = new ResponseObject<>();
 
         try {
-            List<QueueUpRecord> recordList = queueUpService.appendList(new AppendListRequest(group, ignoreExist, requestList));
+            List<QueueUpRecord> recordList = queueUpService.appendList(new AppendListRequest(scope, ignoreExist, requestList));
             List<SimpleAppendResult> resultList = Lists.newLinkedList();
             for (QueueUpRecord record : recordList) {
                 recordPushExecutor.execute(new AppendNotify(webSocketSessionContainer, record));
-                resultList.add(new SimpleAppendResult(record.getGroup(), record.getKey(), record.getIndex()));
+                resultList.add(new SimpleAppendResult(record.getScope(), record.getKey(), record.getIndex()));
             }
             responseObject.setResult(resultList);
         } catch (Exception e) {
-            logger.error("method:{}, group:{},  error:{}",
-                    getMethod(), group, e.getMessage());
+            logger.error("method:{}, scope:{},  error:{}",
+                    getMethod(), scope, e.getMessage());
             responseObject.setError(new ResponseError(500, e.getMessage()));
         }
         return responseObject;
@@ -84,8 +84,7 @@ public class AppendListMethod extends RpcMethod {
             return null;
         }
 
-        // group
-        return writableExecutor.getByGroup(requestObject.getParams().get(0).toString());
+        return writableExecutor.getByScope(requestObject.getParams().get(0).toString());
     }
 
     @Override
@@ -93,10 +92,10 @@ public class AppendListMethod extends RpcMethod {
 
         List params = requestObject.getParams();
 
-        String group = params.get(0).toString();
+        String scope = params.get(0).toString();
         Boolean ignoreExist = Boolean.parseBoolean(params.get(1).toString());
         JSONArray list = (JSONArray) params.get(2);
 
-        return orderDBAppendList(group, ignoreExist, list);
+        return orderDBAppendList(scope, ignoreExist, list);
     }
 }

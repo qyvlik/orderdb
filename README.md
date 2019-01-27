@@ -28,7 +28,7 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `key`: unique key of data
 - `data`: the data, json format
 
@@ -53,7 +53,7 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `index`: index of data
 
 ```json
@@ -76,7 +76,7 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `key`: key of data
 
 ```json
@@ -95,11 +95,11 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 {
   "id": 10001,
   "method": "append.list",
-  "params":["test", true, [{"group":"test", "key":"key1"},{"group":"test", "key":"key2"}]]
+  "params":["test", true, [{"scope":"test", "key":"key1"},{"scope":"test", "key":"key2"}]]
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `ignoreExist`: ignore if the key is exist, or throw a exception
 - `list`: data of list
 
@@ -109,12 +109,12 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
   "method": "append",
   "result": [
     {
-      "group": "test",
+      "scope": "test",
       "key": "key1",
       "index": 1
     },
     {
-      "group": "test",
+      "scope": "test",
       "key": "key2",
       "index": 2
     }
@@ -134,7 +134,7 @@ qyvlik/orderdb --orderdb.disk.directory=/home/www/orderdb
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `index`: index of data
 
 response:
@@ -144,7 +144,7 @@ response:
   "id": 10001,
   "method": "get.by.index",
   "result":{
-    "group": "test",
+    "scope": "test",
     "key": "action-1000",
     "index": 1,
     "data":{}
@@ -166,7 +166,7 @@ response:
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `key`: unique key of data
 
 response:
@@ -176,7 +176,7 @@ response:
   "id": 10001,
   "method": "get.by.key",
   "result":{
-    "group": "test",
+    "scope": "test",
     "key": "action-1000",
     "index": 1,
     "data":{}
@@ -198,7 +198,7 @@ response:
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 
 response
 
@@ -222,7 +222,7 @@ return the latest index number.
 }
 ```
 
-- `group`: group of your data
+- `scope`: scope of your data
 - `from`: index which is start
 - `to`: index which is end
 
@@ -234,13 +234,13 @@ response
   "method": "get.by.key",
   "result":[
     {
-      "group": "test",
+      "scope": "test",
       "key": "action-1000",
       "index": 1,
       "data":{}
     },
     {
-      "group": "test",
+      "scope": "test",
       "key": "action-1001",
       "index": 2,
       "data":{}
@@ -259,7 +259,7 @@ response
 }
 ```
 
-- `group`: which group you want subscribe.
+- `scope`: which scope you want subscribe.
 
 if you subscribe success, response as follow
 
@@ -276,7 +276,7 @@ when some one call `append` for order some data, will receive the data as follow
 {
   "channel": "sub.append",
   "result": {
-    "group": "test",
+    "scope": "test",
     "key": "action-1001",
     "index": 2,
     "data":{}
@@ -294,7 +294,7 @@ when some one call `append` for order some data, will receive the data as follow
 }
 ```
 
-- `group`: which group you want subscribe.
+- `scope`: which scope you want subscribe.
 
 if you subscribe success, response as follow
 
@@ -311,7 +311,7 @@ when some one call `delete some data, will receive the data as follow
 {
   "channel": "sub.delete",
   "result": {
-    "group": "test",
+    "scope": "test",
     "key": "action-1001",
     "index": 2,
     "data":{}
