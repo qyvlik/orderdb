@@ -63,9 +63,16 @@ public class OrderDBFactory {
         return dbMap;
     }
 
-    // todo check scope
     public DB createDBByScope(String scope, boolean createIfMissing) {
-        // not include `sys`
+        if (StringUtils.isBlank(scope)) {
+            throw new RuntimeException("scope is empty");
+        }
+
+        final String regexStr = "^[\\.0-9a-zA-Z _-]+$";
+        if (!scope.matches(regexStr)) {
+            throw new RuntimeException("scope not match:" + regexStr);
+        }
+
         if (getOrderDBDiskScopeLimit() < dbMap.size() - 1) {
             throw new RuntimeException("createDBByScope failure : scope count more than "
                     + orderDBDiskScopeLimit);
