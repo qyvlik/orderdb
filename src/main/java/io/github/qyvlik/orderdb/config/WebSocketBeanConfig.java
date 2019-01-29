@@ -20,9 +20,16 @@ public class WebSocketBeanConfig {
     @Value("${orderdb.thread.read}")
     private Integer orderDbThreadRead;
 
+
+    @Value("${jsonrpclite.sendTimeLimit}")
+    private Integer sendTimeLimit;
+
+    @Value("${jsonrpclite.bufferSizeLimit}")
+    private Integer bufferSizeLimit;
+
     @Bean("webSocketSessionContainer")
     public WebSocketSessionContainer webSocketSessionContainer() {
-        return new WebSocketSessionContainer();
+        return new WebSocketSessionContainer(sendTimeLimit, bufferSizeLimit);
     }
 
     @Bean("webSocketExecutor")

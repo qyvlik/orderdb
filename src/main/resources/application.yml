@@ -10,6 +10,10 @@ orderdb:
     checkPassword: false
     password: orderdb2018
 
+jsonrpclite:
+  sendTimeLimit: 2000
+  bufferSizeLimit: 20000
+
 server:
   port: 17711
 
