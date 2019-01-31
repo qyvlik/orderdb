@@ -46,7 +46,7 @@ public class RpcClientTest {
 
         logger.info("append end");
 
-        Thread.sleep(10000);
+        Thread.sleep(300000);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class RpcClientTest {
         stopWatch.start("get.latest.index");
         Future<ResponseObject> resFuture = rpcClient.callRpcAsync(
                 "get.latest.index",
-                Lists.newArrayList("test"));
+                Lists.newArrayList("test"),false);
         ResponseObject resObj = resFuture.get();
 
         logger.info("get.latest.index:{}", resObj.getResult());
@@ -71,11 +71,11 @@ public class RpcClientTest {
         stopWatch.stop();
 
         stopWatch.start("append");
-        int index = 100000;
+        int index = 50000;
         while (index-- > 0) {
             rpcClient.callRpcAsync(
                     "append",
-                    Lists.newArrayList("test", "key_10_" + index, Maps.newHashMap()));
+                    Lists.newArrayList("test", "key_11_" + index, Maps.newHashMap()));
         }
         stopWatch.stop();
 
@@ -83,22 +83,27 @@ public class RpcClientTest {
         Future<ResponseObject> resFuture2 =
                 rpcClient.callRpcAsync(
                         "get.latest.index",
-                        Lists.newArrayList("test"));
-
+                        Lists.newArrayList("test"),false);
         ResponseObject resObj2 = resFuture2.get();
-
-        stopWatch.stop();
-
-        stopWatch.start("sys.state:");
 
         Future<ResponseObject> resFuture3 =
                 rpcClient.callRpcAsync(
-                        "sys.state",
-                        Lists.newArrayList("test"));
+                        "get.latest.index",
+                        Lists.newArrayList("test"),false);
         ResponseObject resObj3 = resFuture3.get();
+
         stopWatch.stop();
 
-        logger.info("callRpcAsync:cost time:{}ms, {}", stopWatch.prettyPrint(), resObj2);
+        stopWatch.start("sys.state");
+
+        Future<ResponseObject> resFuture4 =
+                rpcClient.callRpcAsync(
+                        "sys.state",
+                        Lists.newArrayList("test"),false);
+        ResponseObject resObj4 = resFuture4.get();
+        stopWatch.stop();
+
+        logger.info("callRpcAsync:cost time:{}ms, {}", stopWatch.prettyPrint(), resObj4);
     }
 
 }
