@@ -52,18 +52,20 @@ public class RpcClientTest {
     @Test
     public void callRpcAsync() throws Exception {
 
-        RpcClient rpcClient = new RpcClient("ws://localhost:17711/orderdb");
+        RpcClient writeClient = new RpcClient("ws://localhost:17711/orderdb", 500, 20000);
+        writeClient.startup();
 
-        rpcClient.startup();
+        RpcClient readClient = new RpcClient("ws://localhost:17711/orderdb");
+        readClient.startup();
 
         Thread.sleep(2000);
 
         StopWatch stopWatch = new StopWatch("callRpcAsync");
 
         stopWatch.start("get.latest.index");
-        Future<ResponseObject> resFuture = rpcClient.callRpcAsync(
+        Future<ResponseObject> resFuture = readClient.callRpcAsync(
                 "get.latest.index",
-                Lists.newArrayList("test"),false);
+                Lists.newArrayList("test"), false);
         ResponseObject resObj = resFuture.get();
 
         logger.info("get.latest.index:{}", resObj.getResult());
@@ -71,39 +73,45 @@ public class RpcClientTest {
         stopWatch.stop();
 
         stopWatch.start("append");
-        int index = 50000;
+        int index = 15000;
         while (index-- > 0) {
-            rpcClient.callRpcAsync(
+            writeClient.callRpcAsync(
                     "append",
-                    Lists.newArrayList("test", "key_11_" + index, Maps.newHashMap()));
+                    Lists.newArrayList("test", "key_25_" + index, Maps.newHashMap()));
         }
         stopWatch.stop();
 
-        stopWatch.start("get.latest.index");
-        Future<ResponseObject> resFuture2 =
-                rpcClient.callRpcAsync(
-                        "get.latest.index",
-                        Lists.newArrayList("test"),false);
-        ResponseObject resObj2 = resFuture2.get();
-
-        Future<ResponseObject> resFuture3 =
-                rpcClient.callRpcAsync(
-                        "get.latest.index",
-                        Lists.newArrayList("test"),false);
-        ResponseObject resObj3 = resFuture3.get();
-
-        stopWatch.stop();
+        logger.info("append end");
 
         stopWatch.start("sys.state");
 
-        Future<ResponseObject> resFuture4 =
-                rpcClient.callRpcAsync(
-                        "sys.state",
-                        Lists.newArrayList("test"),false);
-        ResponseObject resObj4 = resFuture4.get();
+        int count = 0;
+        boolean ready = false;
+        while (!ready) {
+            Future<ResponseObject> resFuture4 =
+                    readClient.callRpcAsync(
+                            "sys.state",
+                            Lists.newArrayList("test"), false);
+            ResponseObject resObj4 = resFuture4.get();
+            count++;
+            if (resObj4.getResult().toString().equalsIgnoreCase("scope: test have pending size:0")) {
+                ready = true;
+            }
+        }
+
         stopWatch.stop();
 
-        logger.info("callRpcAsync:cost time:{}ms, {}", stopWatch.prettyPrint(), resObj4);
+
+        stopWatch.start("get.latest.index");
+        Future<ResponseObject> resFuture3 =
+                readClient.callRpcAsync(
+                        "get.latest.index",
+                        Lists.newArrayList("test"), false);
+        ResponseObject resObj3 = resFuture3.get();
+        logger.info("get.latest.index:{}", resObj3.getResult());
+        stopWatch.stop();
+
+        logger.info("callRpcAsync:requestCount:{}, {}", count, stopWatch.prettyPrint());
     }
 
 }
