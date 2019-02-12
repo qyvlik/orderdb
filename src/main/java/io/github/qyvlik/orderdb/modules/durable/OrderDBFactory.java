@@ -68,7 +68,7 @@ public class OrderDBFactory {
             throw new RuntimeException("scope is empty");
         }
 
-        final String regexStr = "^[\\.0-9a-zA-Z _-]+$";
+        final String regexStr = "^[\\.0-9a-zA-Z_-]+$";
         if (!scope.matches(regexStr)) {
             throw new RuntimeException("scope not match:" + regexStr);
         }

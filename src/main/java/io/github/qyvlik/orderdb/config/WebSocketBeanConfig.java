@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -20,16 +21,21 @@ public class WebSocketBeanConfig {
     @Value("${orderdb.thread.read}")
     private Integer orderDbThreadRead;
 
+    @Value("${websocket.client.sendTimeLimit}")
+    private Integer clientSendTimeLimit;
 
-    @Value("${jsonrpclite.sendTimeLimit}")
-    private Integer sendTimeLimit;
+    @Value("${websocket.client.bufferSizeLimit}")
+    private Integer clientBufferSizeLimit;
 
-    @Value("${jsonrpclite.bufferSizeLimit}")
-    private Integer bufferSizeLimit;
+    @Value("${websocket.server.maxTextMessageBufferSize}")
+    private Integer maxTextMessageBufferSize;
+
+    @Value("${websocket.server.maxBinaryMessageBufferSize}")
+    private Integer maxBinaryMessageBufferSize;
 
     @Bean("webSocketSessionContainer")
     public WebSocketSessionContainer webSocketSessionContainer() {
-        return new WebSocketSessionContainer(sendTimeLimit, bufferSizeLimit);
+        return new WebSocketSessionContainer(clientSendTimeLimit, clientBufferSizeLimit);
     }
 
     @Bean("webSocketExecutor")
@@ -46,9 +52,7 @@ public class WebSocketBeanConfig {
             @Autowired @Qualifier("webSocketExecutor") Executor webSocketExecutor,
             @Autowired @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer,
             @Autowired List<RpcMethod> rpcMethodList,
-            @Autowired List<WebSocketFilter> filters
-    ) {
-
+            @Autowired List<WebSocketFilter> filters) {
         WebSocketDispatch webSocketDispatch = new WebSocketDispatch();
 
         webSocketDispatch.setGroup("orderdb");
@@ -60,5 +64,11 @@ public class WebSocketBeanConfig {
         return webSocketDispatch;
     }
 
-
+    @Bean
+    public ServletServerContainerFactoryBean servletServerContainerFactoryBean() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxTextMessageBufferSize(maxTextMessageBufferSize);
+        container.setMaxBinaryMessageBufferSize(maxBinaryMessageBufferSize);
+        return container;
+    }
 }

@@ -6,11 +6,15 @@ import io.github.qyvlik.jsonrpclite.core.client.ChannelMessageHandler;
 import io.github.qyvlik.jsonrpclite.core.client.RpcClient;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
 import io.github.qyvlik.jsonrpclite.core.jsonsub.pub.ChannelMessage;
+import io.github.qyvlik.orderdb.entity.request.AppendRequest;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 public class RpcClientTest {
@@ -19,11 +23,9 @@ public class RpcClientTest {
 
     @Test
     public void listenSub() throws Exception {
-        RpcClient rpcClient = new RpcClient("ws://localhost:17711/orderdb");
+        RpcClient rpcClient = new RpcClient("ws://localhost:17711/orderdb", 1000, 10000);
 
-        rpcClient.startup();
-
-        Thread.sleep(2000);
+        rpcClient.startup().get();          // sync
 
         rpcClient.listenSub("sub.append",
                 true,
@@ -53,19 +55,17 @@ public class RpcClientTest {
     public void callRpcAsync() throws Exception {
 
         RpcClient writeClient = new RpcClient("ws://localhost:17711/orderdb", 500, 20000);
-        writeClient.startup();
+        writeClient.startup().get();        // sync
 
-        RpcClient readClient = new RpcClient("ws://localhost:17711/orderdb");
-        readClient.startup();
-
-        Thread.sleep(2000);
+        RpcClient readClient = new RpcClient("ws://localhost:17711/orderdb", 1000, 10000);
+        readClient.startup().get();         // sync
 
         StopWatch stopWatch = new StopWatch("callRpcAsync");
 
         stopWatch.start("get.latest.index");
-        Future<ResponseObject> resFuture = readClient.callRpcAsync(
+        Future<ResponseObject> resFuture = readClient.callRpc(
                 "get.latest.index",
-                Lists.newArrayList("test"), false);
+                Lists.newArrayList("test"));
         ResponseObject resObj = resFuture.get();
 
         logger.info("get.latest.index:{}", resObj.getResult());
@@ -89,9 +89,9 @@ public class RpcClientTest {
         boolean ready = false;
         while (!ready) {
             Future<ResponseObject> resFuture4 =
-                    readClient.callRpcAsync(
+                    readClient.callRpc(
                             "sys.state",
-                            Lists.newArrayList("test"), false);
+                            Lists.newArrayList("test"));
             ResponseObject resObj4 = resFuture4.get();
             count++;
             if (resObj4.getResult().toString().equalsIgnoreCase("scope: test have pending size:0")) {
@@ -104,14 +104,60 @@ public class RpcClientTest {
 
         stopWatch.start("get.latest.index");
         Future<ResponseObject> resFuture3 =
-                readClient.callRpcAsync(
+                readClient.callRpc(
                         "get.latest.index",
-                        Lists.newArrayList("test"), false);
+                        Lists.newArrayList("test"));
         ResponseObject resObj3 = resFuture3.get();
         logger.info("get.latest.index:{}", resObj3.getResult());
         stopWatch.stop();
 
         logger.info("callRpcAsync:requestCount:{}, {}", count, stopWatch.prettyPrint());
+    }
+
+    @Test
+    public void testAppendList() throws Exception {
+        StopWatch stopWatch = new StopWatch("testAppendList");
+
+        RpcClient writeClient = new RpcClient("ws://localhost:17711/orderdb", 500, 2000000);
+
+        stopWatch.start("connect");
+        boolean connectResult = writeClient.startup().get();        // sync
+        logger.info("connectResult:{}", connectResult);
+        stopWatch.stop();
+
+        stopWatch.start("gen list");
+        String scope = "test";
+        int index = 10000;
+        List<AppendRequest> list = Lists.newLinkedList();
+        while (index-- > 0) {
+            Map<String, String> data = Maps.newHashMap();
+            data.put("1", uuid());
+            data.put("2", uuid());
+            data.put("3", uuid());
+            data.put("4", uuid());
+            data.put("5", uuid());
+            data.put("6", uuid());
+            data.put("7", uuid());
+            data.put("8", uuid());
+            data.put("9", uuid());
+            list.add(new AppendRequest(scope, uuid(), data));
+        }
+        stopWatch.stop();
+
+        stopWatch.start("append.list");
+        Future<ResponseObject> resFuture1 =
+                writeClient.callRpc(
+                        "append.list",
+                        Lists.newArrayList(scope, true, list));
+        ResponseObject resObj1 = resFuture1.get();
+        logger.info("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
+        stopWatch.stop();
+
+        logger.info("testAppendList:{}", stopWatch.prettyPrint());
+    }
+
+    private String uuid() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
 }

@@ -10,9 +10,13 @@ orderdb:
     checkPassword: false
     password: orderdb2018
 
-jsonrpclite:
-  sendTimeLimit: 2000
-  bufferSizeLimit: 20000
+websocket:
+  client:
+    sendTimeLimit: 2000
+    bufferSizeLimit: 20000
+  server:
+    maxTextMessageBufferSize: 10485760
+    maxBinaryMessageBufferSize: 10485760
 
 server:
   port: 17711

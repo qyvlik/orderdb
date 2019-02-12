@@ -5,7 +5,7 @@ import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParam;
 
 public class ListParam extends RpcParam {
     public ListParam(String paramName) {
-        this.setTypeName("appendList");
+        this.setTypeName("list");
         this.setParamName(paramName);
     }
 

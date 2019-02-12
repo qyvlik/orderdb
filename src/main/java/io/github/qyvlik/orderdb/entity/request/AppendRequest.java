@@ -11,6 +11,12 @@ public class AppendRequest implements Serializable {
 
     }
 
+    public AppendRequest(String scope, String key, Object data) {
+        this.scope = scope;
+        this.key = key;
+        this.data = data;
+    }
+
     public String getScope() {
         return scope;
     }
