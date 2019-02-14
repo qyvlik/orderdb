@@ -125,9 +125,19 @@ public class RpcClientTest {
         logger.info("connectResult:{}", connectResult);
         stopWatch.stop();
 
-        stopWatch.start("gen list");
+        int count = 250;
+        while (count-- > 0) {
+            stopWatch.start("testAppendList:" + count);
+            testAppendList(writeClient, 2000);
+            stopWatch.stop();
+        }
+
+        logger.info("testAppendList:{}", stopWatch.prettyPrint());
+    }
+
+    private void testAppendList(RpcClient writeClient, int totalCount) throws Exception {
         String scope = "test";
-        int index = 10000;
+        int index = totalCount;
         List<AppendRequest> list = Lists.newLinkedList();
         while (index-- > 0) {
             Map<String, String> data = Maps.newHashMap();
@@ -142,18 +152,13 @@ public class RpcClientTest {
             data.put("9", uuid());
             list.add(new AppendRequest(scope, uuid(), data));
         }
-        stopWatch.stop();
 
-        stopWatch.start("append.list");
         Future<ResponseObject> resFuture1 =
                 writeClient.callRpc(
                         "append.list",
                         Lists.newArrayList(scope, true, list));
         ResponseObject resObj1 = resFuture1.get();
-        logger.info("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
-        stopWatch.stop();
-
-        logger.info("testAppendList:{}", stopWatch.prettyPrint());
+        logger.debug("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
     }
 
     private String uuid() {
