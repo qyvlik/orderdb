@@ -5,7 +5,7 @@ COPY src/ src/
 VOLUME /var/maven/.m2
 RUN mvn -DskipTests clean package
 
-FROM frolvlad/alpine-oraclejdk8-temporary
+FROM frolvlad/alpine-java
 
 MAINTAINER "test <qyvlik@qq.com>"
 
