@@ -3,28 +3,66 @@ package io.github.qyvlik.orderdb.modules.executor;
 import com.google.common.collect.Lists;
 
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class CompoundRunnableExecutor {
     private final Lock lock;
-    private Queue<CompoundRunnable> runnableQueue;
+    private final LinkedBlockingQueue<CompoundRunnable> runnableQueue;
     private Executor executor;
     private RunnableCombiner runnableCombiner;
     private int maxCombineSize;
+    private long maxCombineTimeout;
 
-    public CompoundRunnableExecutor(Executor executor, RunnableCombiner runnableCombiner, int maxCombineSize) {
+    public CompoundRunnableExecutor(Executor executor, RunnableCombiner runnableCombiner, int maxCombineSize, long maxCombineTimeout) {
         this.lock = new ReentrantLock();
         this.runnableQueue = new LinkedBlockingQueue<CompoundRunnable>();
         this.executor = executor;
         this.runnableCombiner = runnableCombiner;
         this.maxCombineSize = maxCombineSize;
+        this.maxCombineTimeout = maxCombineTimeout;
     }
 
-    public void execute(CompoundRunnable compoundRunnable) {
+    public int getRunnableQueueSize() {
+        return runnableQueue.size();
+    }
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
+    }
+
+    public RunnableCombiner getRunnableCombiner() {
+        return runnableCombiner;
+    }
+
+    public void setRunnableCombiner(RunnableCombiner runnableCombiner) {
+        this.runnableCombiner = runnableCombiner;
+    }
+
+    public int getMaxCombineSize() {
+        return maxCombineSize;
+    }
+
+    public void setMaxCombineSize(int maxCombineSize) {
+        this.maxCombineSize = maxCombineSize;
+    }
+
+    public long getMaxCombineTimeout() {
+        return maxCombineTimeout;
+    }
+
+    public void setMaxCombineTimeout(long maxCombineTimeout) {
+        this.maxCombineTimeout = maxCombineTimeout;
+    }
+
+    public void execute(CompoundRunnable compoundRunnable) throws InterruptedException {
         this.runnableQueue.add(compoundRunnable);
         do {
             if (!tryCombineAndExecute()) {
@@ -33,7 +71,7 @@ public class CompoundRunnableExecutor {
         } while (!this.runnableQueue.isEmpty());
     }
 
-    private boolean tryCombineAndExecute() {
+    private boolean tryCombineAndExecute() throws InterruptedException {
         if (!lock.tryLock()) {
             return false;
         }
@@ -41,13 +79,12 @@ public class CompoundRunnableExecutor {
         try {
             List<CompoundRunnable> batchRunnableList = Lists.newLinkedList();
 
-            while (!this.runnableQueue.isEmpty()) {
-                CompoundRunnable runnable = this.runnableQueue.poll();
+            while (true) {
+                CompoundRunnable runnable = this.runnableQueue.poll(this.maxCombineTimeout, TimeUnit.MILLISECONDS);
                 if (runnable == null) {
                     break;
                 }
                 batchRunnableList.add(runnable);
-
                 if (batchRunnableList.size() >= this.maxCombineSize) {
                     break;
                 }
@@ -66,12 +103,5 @@ public class CompoundRunnableExecutor {
         } finally {
             lock.unlock();
         }
-    }
-
-    public interface RunnableCombiner {
-        CompoundRunnable combine(List<CompoundRunnable> compoundRunnableList);
-    }
-
-    public interface CompoundRunnable extends Runnable {
     }
 }
