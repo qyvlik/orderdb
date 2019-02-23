@@ -1,48 +1,21 @@
 package io.github.qyvlik.orderdb.modules.binlog;
 
 
-import com.google.common.collect.Lists;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.request.RequestObject;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseError;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.response.ResponseObject;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcParams;
-import io.github.qyvlik.orderdb.entity.param.StringParam;
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.annotation.RpcMethod;
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.annotation.RpcService;
 import io.github.qyvlik.orderdb.modules.queueup.QueueUpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.util.List;
-
+@RpcService
 @Service
-public class GetBinlogLastIndexMethod extends RpcMethod {
+public class GetBinlogLastIndexMethod {
 
     @Autowired
     private QueueUpService queueUpService;
 
-    public GetBinlogLastIndexMethod() {
-        super("orderdb", "get.binlog.lastIndex", new RpcParams(
-                Lists.newArrayList(
-                        new StringParam("scope")
-                )));
-    }
-
-    public ResponseObject<Long> getBinlogLastIndex(String scope) {
-        ResponseObject<Long> responseObject = new ResponseObject<>();
-        try {
-            Long lastIndex = queueUpService.getBinlogLastIndexByScope(scope);
-            responseObject.setResult(lastIndex);
-        } catch (Exception e) {
-            responseObject.setError(new ResponseError(500, e.getMessage()));
-        }
-        return responseObject;
-    }
-
-    @Override
-    protected ResponseObject callInternal(WebSocketSession session, RequestObject requestObject) {
-        List params = requestObject.getParams();
-        String scope = params.get(0).toString();
-        return getBinlogLastIndex(scope);
+    @RpcMethod(group = "orderdb", value = "get.binlog.lastIndex")
+    public Long getBinlogLastIndex(String scope) {
+        return queueUpService.getBinlogLastIndexByScope(scope);
     }
 }

@@ -3,10 +3,14 @@ package io.github.qyvlik.orderdb.config;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketDispatch;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketFilter;
 import io.github.qyvlik.jsonrpclite.core.handle.WebSocketSessionContainer;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.method.RpcMethod;
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.rpcinvoker.RpcDispatcher;
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.rpcinvoker.RpcExecutor;
+import io.github.qyvlik.orderdb.modules.executor.SimpleRpcExecutor;
+import io.github.qyvlik.orderdb.modules.executor.WritableExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
@@ -47,18 +51,41 @@ public class WebSocketBeanConfig {
         return Executors.newFixedThreadPool(orderDbThreadRead);
     }
 
+    @Bean("recordPushExecutor")
+    public Executor recordPushExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
+
+    @Bean("writableExecutor")
+    public WritableExecutor writableExecutor() {
+        return new WritableExecutor();
+    }
+
+    @Bean(value = "rpcDispatcher", initMethod = "initInvoker")
+    public RpcDispatcher rpcDispatcher(
+            @Autowired ApplicationContext applicationContext) {
+        return new RpcDispatcher(applicationContext);
+    }
+
+    @Bean("rpcExecutor")
+    public RpcExecutor rpcExecutor(
+            @Qualifier("webSocketExecutor") Executor webSocketExecutor,
+            @Qualifier("writableExecutor") WritableExecutor writableExecutor) {
+        return new SimpleRpcExecutor(webSocketExecutor, writableExecutor);
+    }
+
     @Bean("orderDBDispatch")
     public WebSocketDispatch orderDBDispatch(
-            @Autowired @Qualifier("webSocketExecutor") Executor webSocketExecutor,
-            @Autowired @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer,
-            @Autowired List<RpcMethod> rpcMethodList,
+            @Qualifier("rpcExecutor") RpcExecutor rpcExecutor,
+            @Qualifier("rpcDispatcher") RpcDispatcher rpcDispatcher,
+            @Qualifier("webSocketSessionContainer") WebSocketSessionContainer webSocketSessionContainer,
             @Autowired List<WebSocketFilter> filters) {
         WebSocketDispatch webSocketDispatch = new WebSocketDispatch();
 
         webSocketDispatch.setGroup("orderdb");
-        webSocketDispatch.setExecutor(webSocketExecutor);
+        webSocketDispatch.setRpcDispatcher(rpcDispatcher);
+        webSocketDispatch.setRpcExecutor(rpcExecutor);
         webSocketDispatch.setWebSocketSessionContainer(webSocketSessionContainer);
-        webSocketDispatch.addRpcMethodList(rpcMethodList);
         webSocketDispatch.addFilterList(filters);
 
         return webSocketDispatch;

@@ -21,16 +21,6 @@ public class OrderDBConfig {
     @Value("${orderdb.admin.password}")
     private String orderDBAdminPassword;
 
-    @Bean("recordPushExecutor")
-    public Executor recordPushExecutor() {
-        return Executors.newSingleThreadExecutor();
-    }
-
-    @Bean("writableExecutor")
-    public WritableExecutor writableExecutor() {
-        return new WritableExecutor();
-    }
-
     @Bean("orderDBFactory")
     public OrderDBFactory orderDBFactory() {
         return new OrderDBFactory(orderDBDiskDirectory,
