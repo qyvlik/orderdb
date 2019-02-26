@@ -15,6 +15,8 @@ import org.springframework.util.StopWatch;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class RpcClientTest {
@@ -125,10 +127,14 @@ public class RpcClientTest {
         logger.info("connectResult:{}", connectResult);
         stopWatch.stop();
 
-        int count = 250;
+        stopWatch.start("active");
+        testAppendList(writeClient, 1);         // active
+        stopWatch.stop();
+
+        int count = 10000;
         while (count-- > 0) {
             stopWatch.start("testAppendList:" + count);
-            testAppendList(writeClient, 2000);
+            testAppendList(writeClient, 1);
             stopWatch.stop();
         }
 
@@ -158,11 +164,52 @@ public class RpcClientTest {
                         "append.list",
                         Lists.newArrayList(scope, true, list));
         ResponseObject resObj1 = resFuture1.get();
-        logger.debug("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
+        // logger.debug("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
     }
 
     private String uuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
+
+    @Test
+    public void testAppendListMultiThread() throws Exception {
+        StopWatch stopWatch = new StopWatch("testAppendList");
+
+        RpcClient writeClient = new RpcClient("ws://localhost:17711/orderdb", 500, 2000000);
+
+        Executor executor = Executors.newFixedThreadPool(32);
+
+        stopWatch.start("connect");
+        boolean connectResult = writeClient.startup().get();        // sync
+        logger.info("connectResult:{}", connectResult);
+        stopWatch.stop();
+
+        stopWatch.start("active");
+        testAppendList(writeClient, 1);         // active
+        stopWatch.stop();
+
+        stopWatch.start("submit task");
+        int count = 2000;
+        BatchRunner batchRunner = new BatchRunner(executor, count);
+        while (count-- > 0) {
+            batchRunner.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        testAppendList(writeClient, 1);
+                    } catch (Exception e) {
+                    }
+                }
+            });
+        }
+        stopWatch.stop();
+
+        stopWatch.start("waitDone");
+        batchRunner.waitDone();
+        stopWatch.stop();
+
+        logger.info("testAppendList:{}", stopWatch.prettyPrint());
     }
 
 }
