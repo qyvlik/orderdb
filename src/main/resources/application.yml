@@ -9,6 +9,8 @@ orderdb:
   admin:
     checkPassword: false
     password: orderdb2018
+  leveldb:
+    blocksize: 10240
 
 websocket:
   client:

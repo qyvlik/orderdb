@@ -36,15 +36,17 @@ public class OrderDBFactory {
     private String orderDBDiskDirectory;
     private Long orderDBDiskScopeLimit;
     private String initPassword;
+    private int levelDBBlockSize;
 
     public OrderDBFactory() {
 
     }
 
-    public OrderDBFactory(String orderDBDiskDirectory, Long orderDBDiskScopeLimit, String initPassword) {
+    public OrderDBFactory(String orderDBDiskDirectory, Long orderDBDiskScopeLimit, String initPassword, int levelDBBlockSize) {
         this.orderDBDiskDirectory = orderDBDiskDirectory;
         this.orderDBDiskScopeLimit = orderDBDiskScopeLimit;
         this.initPassword = initPassword;
+        this.levelDBBlockSize = levelDBBlockSize;
     }
 
     public String getOrderDBDiskDirectory() {
@@ -112,6 +114,7 @@ public class OrderDBFactory {
 
         Options options = new Options();
         options.createIfMissing(true);
+        options.blockSize(this.levelDBBlockSize);
 
         String directory = getOrderDBDiskDirectory();
 

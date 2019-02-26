@@ -21,10 +21,15 @@ public class OrderDBConfig {
     @Value("${orderdb.admin.password}")
     private String orderDBAdminPassword;
 
+    @Value("${orderdb.leveldb.blocksize}")
+    private Integer levelDBBlockSize;
+
+
     @Bean("orderDBFactory")
     public OrderDBFactory orderDBFactory() {
         return new OrderDBFactory(orderDBDiskDirectory,
                 orderDBDiskScopeLimit,
-                orderDBAdminPassword);
+                orderDBAdminPassword,
+                levelDBBlockSize);
     }
 }
