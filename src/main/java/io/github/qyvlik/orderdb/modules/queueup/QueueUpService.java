@@ -171,7 +171,7 @@ public class QueueUpService {
 
     }
 
-
+    // todo 解决 binlog 写放大
     public List<QueueUpRecord> appendList(AppendListRequest request) {
         if (request.getList() == null || request.getList().size() == 0) {
             throw new RuntimeException("appendList failure : list is empty");
@@ -196,7 +196,6 @@ public class QueueUpService {
 
         List<QueueUpRecord> recordList = Lists.newLinkedList();
 
-        // todo check the request.getList() repeat
         for (AppendRequest appendRequest : request.getList()) {
             QueueUpRecord record = getByScopeAndKey(levelDB, appendRequest.getScope(), appendRequest.getKey());
 
@@ -260,6 +259,7 @@ public class QueueUpService {
         return recordList;
     }
 
+    // todo 解决 binlog 写放大
     public QueueUpRecord append(String scope, String key, Object data) {
         DB levelDB = orderDBFactory.createDBByScope(scope, true);
 

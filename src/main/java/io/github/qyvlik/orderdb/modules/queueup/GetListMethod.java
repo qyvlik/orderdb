@@ -19,8 +19,6 @@ public class GetListMethod {
 
     @RpcMethod(group = "orderdb", value = "get.list")
     private List<QueueUpRecord> getList(String scope, Long from, Long to) {
-        ResponseObject<List<QueueUpRecord>> responseObject = new ResponseObject<>();
-
         if (from == null || from < 0) {
             throw new RuntimeException("from must bigger than zero");
         }

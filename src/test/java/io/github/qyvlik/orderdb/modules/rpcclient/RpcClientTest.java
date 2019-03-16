@@ -131,10 +131,10 @@ public class RpcClientTest {
         testAppendList(writeClient, 1);         // active
         stopWatch.stop();
 
-        int count = 10000;
+        int count = 100;
         while (count-- > 0) {
             stopWatch.start("testAppendList:" + count);
-            testAppendList(writeClient, 1);
+            testAppendList(writeClient, 100);
             stopWatch.stop();
         }
 
@@ -164,7 +164,7 @@ public class RpcClientTest {
                         "append.list",
                         Lists.newArrayList(scope, true, list));
         ResponseObject resObj1 = resFuture1.get();
-        // logger.debug("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
+        logger.debug("testAppendList append.list:{}", ((List) resObj1.getResult()).size());
     }
 
     private String uuid() {

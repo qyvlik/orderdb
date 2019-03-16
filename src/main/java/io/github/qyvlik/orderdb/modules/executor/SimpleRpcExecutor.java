@@ -1,7 +1,7 @@
 package io.github.qyvlik.orderdb.modules.executor;
 
+import io.github.qyvlik.jsonrpclite.core.jsonrpc.concurrent.RpcExecutor;
 import io.github.qyvlik.jsonrpclite.core.jsonrpc.entity.request.RequestObject;
-import io.github.qyvlik.jsonrpclite.core.jsonrpc.rpcinvoker.RpcExecutor;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.concurrent.Executor;
